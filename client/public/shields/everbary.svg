@@ -1,0 +1,22 @@
+<svg width="500px" height="525px" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="sp" x1="237.9" x2="240.8" y1="538.4" y2="-.8" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#fff"/>
+    </linearGradient>
+    <clipPath id="formato">
+      <path d="m466 5 1 83 1 87c0 54-4 102-16 144-11 42-29 78-61 108-33 28-76 52-141 70-64-18-108-42-141-70-32-30-50-66-61-108-12-42-16-90-16-144l1-87 1-83h432Z" stroke-width="39.7"/>
+    </clipPath>
+  </defs>
+  <g id="fundo" fill="#ffffff" x="0">
+    <path d="m466 5 1 83 1 87c0 54-4 102-16 144-11 42-29 78-61 108-33 28-76 52-141 70-64-18-108-42-141-70-32-30-50-66-61-108-12-42-16-90-16-144l1-87 1-83h432Z" stroke-width="39.7"/>
+  </g>
+  <g id="estampa1" clip-path="url(#formato)" fill="#000000" x="0"><path d="M155 136H93v364h62V136Zm126 0h-62v364h62V136Zm126 0h-61v364h61V136Z"/><path fill="#ff241d" d="M0 0h500v136H0z"/></g>
+  <g id="borda" fill="none" stroke="#000000" x="0" clip-path="url(#formato)">
+    <path d="m466 5 1 83 1 87c0 54-4 102-16 144-11 42-29 78-61 108-33 28-76 52-141 70-64-18-108-42-141-70-32-30-50-66-61-108-12-42-16-90-16-144l1-87 1-83h432Z" stroke-width="39.7"/>
+  </g>
+  <g id="adorno"></g>
+  <g clip-path="url(#formato)">
+    <path d="M-30 537a587 587 0 0 1 597-414V61c-39-27-80-51-124-70A506 506 0 0 0 38-9C-5 10-47 34-86 61v277a375 375 0 0 0 56 199z" fill="url(#sp)" opacity=".1"/>
+  </g>
+</svg>

@@ -1,0 +1,22 @@
+<svg width="500px" height="525px" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="sp" x1="237.9" x2="240.8" y1="538.4" y2="-.8" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#fff"/>
+    </linearGradient>
+    <clipPath id="formato">
+      <path d="m466 5 1 83 1 87c0 54-4 102-16 144-11 42-29 78-61 108-33 28-76 52-141 70-64-18-108-42-141-70-32-30-50-66-61-108-12-42-16-90-16-144l1-87 1-83h432Z" stroke-width="39.7"/>
+    </clipPath>
+  </defs>
+  <g id="fundo" fill="#ffffff" x="0">
+    <path d="m466 5 1 83 1 87c0 54-4 102-16 144-11 42-29 78-61 108-33 28-76 52-141 70-64-18-108-42-141-70-32-30-50-66-61-108-12-42-16-90-16-144l1-87 1-83h432Z" stroke-width="39.7"/>
+  </g>
+  <g id="estampa1" clip-path="url(#formato)" fill="#ff241d" x="0"><path d="M155 136H93v364h62V136Zm126 0h-62v364h62V136Zm126 0h-61v364h61V136Z"/><path fill="#ff241d" d="M0 0h500v136H0z"/></g>
+  <g id="borda" fill="none" stroke="#000000" x="0" clip-path="url(#formato)">
+    <path d="m466 5 1 83 1 87c0 54-4 102-16 144-11 42-29 78-61 108-33 28-76 52-141 70-64-18-108-42-141-70-32-30-50-66-61-108-12-42-16-90-16-144l1-87 1-83h432Z" stroke-width="39.7"/>
+  </g>
+  <g id="adorno"><path fill="#7BE3FF" d="m212.6 224.54-37.83-65.52h75.66l-37.84 65.52Z"/><path fill="#55CBF9" d="m249.78 159.02-37.21 64.88h74.42l-37.2-64.88Z"/><path fill="#2CACE5" d="m324.74 159.12-37.4 64.78h74.8l-37.4-64.78Z"/><path fill="#48BBED" d="M287.14 224.18 249.52 159h75.24l-37.62 65.17Z"/><path fill="#55CBF9" d="m137.85 223.69 111.72 120.3L361.7 223.7H137.85Z"/><path fill="#48BBED" d="M212.23 223.9 249.57 344l37.77-120.1h-75.1Z"/><path fill="#21A0D8" d="m287.38 223.69-37.81 120.3L361.7 223.7h-74.33Z"/><path fill="#ABEDFF" d="m175.02 159.02-37.21 64.88h74.42l-37.2-64.88Z"/><path fill="#fff" d="M190.5 176.34c-17.96 1.32-19.03 2.4-20.34 20.34-1.33-17.95-2.4-19.02-20.35-20.34 17.96-1.31 19.03-2.38 20.34-20.34 1.33 17.96 2.4 19.03 20.35 20.34Z"/></g>
+  <g clip-path="url(#formato)">
+    <path d="M-30 537a587 587 0 0 1 597-414V61c-39-27-80-51-124-70A506 506 0 0 0 38-9C-5 10-47 34-86 61v277a375 375 0 0 0 56 199z" fill="url(#sp)" opacity=".1"/>
+  </g>
+</svg>
