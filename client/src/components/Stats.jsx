@@ -12,10 +12,20 @@ export default function Stats({ data }) {
     );
   }
 
-  // Desestruturação com valores padrão para evitar quebra
+  // Desestruturação com valores padrão
   const { saf, probabilities, streaks } = data;
   const winStreak = streaks?.win || { count: 0, teams: [] };
   const loseStreak = streaks?.lose || { count: 0, teams: [] };
+
+  // --- LÓGICA DE VISUALIZAÇÃO DOS NOMES ---
+  // Se tiver streak (>0), mostra o nome do time(s). Se não, mostra o título padrão.
+  const winLabel = winStreak.count > 0 
+      ? winStreak.teams.map(t => t.nome).join(', ') 
+      : "Invencibilidade";
+
+  const loseLabel = loseStreak.count > 0 
+      ? loseStreak.teams.map(t => t.nome).join(', ') 
+      : "Seca de Vitórias";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-12 animate-fade-in">
@@ -47,42 +57,56 @@ export default function Stats({ data }) {
         )}
       </div>
 
-      {/* CARD 2: SEQUÊNCIAS (STREAKS) */}
+      {/* CARD 2: SEQUÊNCIAS (STREAKS) - ATUALIZADO */}
       <div className="bg-card-bg border border-white/10 rounded-xl p-6 shadow-lg">
         <h3 className="text-lfg-green font-bold uppercase tracking-widest text-sm mb-4">Sequências Atuais</h3>
         
         <div className="space-y-4">
             {/* Winning Streak */}
             <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                <div>
-                    <span className="text-2xl mr-2">🔥</span>
-                    <span className="font-bold text-gray-200">Invencibilidade</span>
-                </div>
-                <div className="text-right">
-                    <span className="text-xl font-black text-orange-400">{winStreak.count} J</span>
-                    <div className="text-xs text-gray-500 max-w-[150px] truncate">
-                        {winStreak.teams.map(t => t.nome).join(', ') || "-"}
+                <div className="flex items-center overflow-hidden mr-4">
+                    <span className="text-2xl mr-3">🔥</span>
+                    <div className="flex flex-col overflow-hidden">
+                        {/* AQUI: Nome do time ganha destaque */}
+                        <span className="font-bold text-gray-200 truncate text-lg" title={winLabel}>
+                            {winLabel}
+                        </span>
+                        {/* Subtexto explica o que é */}
+                        <span className="text-[10px] text-gray-500 uppercase tracking-wider">
+                            {winStreak.count > 0 ? "Vitórias Seguidas" : "Nenhuma sequência ativa"}
+                        </span>
                     </div>
+                </div>
+                <div className="text-right whitespace-nowrap">
+                    <span className="text-2xl font-black text-orange-400">{winStreak.count}</span>
+                    <span className="text-xs font-bold text-gray-500 ml-1">J</span>
                 </div>
             </div>
 
             {/* Losing Streak */}
             <div className="flex justify-between items-center">
-                <div>
-                    <span className="text-2xl mr-2">❄️</span>
-                    <span className="font-bold text-gray-200">Seca de Vitórias</span>
-                </div>
-                <div className="text-right">
-                    <span className="text-xl font-black text-blue-400">{loseStreak.count} J</span>
-                    <div className="text-xs text-gray-500 max-w-[150px] truncate">
-                        {loseStreak.teams.map(t => t.nome).join(', ') || "-"}
+                <div className="flex items-center overflow-hidden mr-4">
+                    <span className="text-2xl mr-3">❄️</span>
+                    <div className="flex flex-col overflow-hidden">
+                        {/* AQUI: Nome do time ganha destaque */}
+                        <span className="font-bold text-gray-200 truncate text-lg" title={loseLabel}>
+                            {loseLabel}
+                        </span>
+                        {/* Subtexto explica o que é */}
+                        <span className="text-[10px] text-gray-500 uppercase tracking-wider">
+                            {loseStreak.count > 0 ? "Jogos sem vencer" : "Nenhuma sequência ativa"}
+                        </span>
                     </div>
+                </div>
+                <div className="text-right whitespace-nowrap">
+                    <span className="text-2xl font-black text-blue-400">{loseStreak.count}</span>
+                    <span className="text-xs font-bold text-gray-500 ml-1">J</span>
                 </div>
             </div>
         </div>
       </div>
 
-      {/* CARD 3: PROBABILIDADES (FULL WIDTH) */}
+      {/* CARD 3: PROBABILIDADES */}
       <div className="col-span-1 md:col-span-2 bg-card-bg border border-white/10 rounded-xl p-6 shadow-lg">
         <h3 className="text-lfg-green font-bold uppercase tracking-widest text-sm mb-6">Probabilidade de Título</h3>
         
