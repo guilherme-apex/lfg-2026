@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 
@@ -303,6 +303,10 @@ function calculateAdvancedStats(tabelaArray) {
     return { streaks: { win: { count: maxWinStreak, teams: tabelaArray.filter(t => t.bestWinStreak === maxWinStreak && maxWinStreak > 0) }, lose: { count: maxLoseStreak, teams: tabelaArray.filter(t => t.bestLoseStreak === maxLoseStreak && maxLoseStreak > 0) } }, probabilities };
 }
 
+app.get('/', (req, res) => {
+    res.send("🏀 API LFG 2026 está ON FIRE! O servidor está funcionando.");
+});
+
 app.listen(PORT, () => {
-    console.log(`🔥 Backend LFG (Modo Parciais AO VIVO) rodando na porta ${PORT}`);
+    console.log(`🔥 Backend LFG rodando na porta ${PORT}`);
 });
