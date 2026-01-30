@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
-import Table from './components/Table';
-import Matches from './components/Matches';
+import Table from './components/Table';      // Importado como Table
+import Matches from './components/Matches';  // Importado como Matches
 import Stats from './components/Stats';
 
-// LINK CORRETO QUE VOCÊ CONFIRMOU
+// LINK CORRETO
 const API_URL = 'https://lfg-2026.onrender.com';
 
 export default function App() {
@@ -74,22 +74,22 @@ export default function App() {
     );
   }
 
-  // --- APP PRINCIPAL (LAYOUT SEGURO) ---
+  // --- APP PRINCIPAL ---
   return (
     <div className="min-h-screen bg-dark-bg text-gray-100 font-sans pb-12 flex flex-col">
       
-      {/* 1. HEADER (Fixo no topo da estrutura) */}
+      {/* 1. HEADER */}
       <div className="w-full">
         <Header />
       </div>
 
-      {/* 2. CONTEÚDO (Com margem segura para não invadir) */}
+      {/* 2. CONTEÚDO */}
       <main className="flex-grow w-full max-w-4xl mx-auto px-4 py-6">
         
         {/* Container dos Cards */}
         <div className="bg-card-bg rounded-xl shadow-lg border border-white/5 overflow-hidden w-full">
           
-          {/* Navegação de Abas (Forçando largura total) */}
+          {/* Navegação de Abas */}
           <div className="flex w-full border-b border-white/10">
             <button
               onClick={() => setActiveTab('tabela')}
@@ -120,10 +120,11 @@ export default function App() {
           {/* Área de Conteúdo */}
           <div className="p-4 md:p-6 min-h-[400px]">
             
-            {/* Lógica de Exibição Segura */}
+            {/* Lógica de Exibição Corrigida */}
             {activeTab === 'tabela' && (
               classificacao.length > 0 ? (
-                <Tabela classificacao={classificacao} />
+                // AQUI ESTAVA O ERRO: Tabela -> Table
+                <Table classificacao={classificacao} />
               ) : (
                 <div className="text-center py-10 text-gray-500">
                   <p>A Tabela está sendo processada...</p>
@@ -133,8 +134,8 @@ export default function App() {
             )}
 
             {activeTab === 'confrontos' && (
-               /* Passando uma prop vazia se não tiver dados pra não quebrar */
-               <Confrontos calendario={calendario || {}} />
+               // AQUI ESTAVA O ERRO: Confrontos -> Matches
+               <Matches calendario={calendario || {}} />
             )}
 
             {activeTab === 'estatisticas' && (
@@ -146,7 +147,7 @@ export default function App() {
       </main>
 
       <footer className="text-center text-gray-600 text-xs py-6">
-        <p>LFG 2026 © League Fantasy Game</p>
+        <p>LFG 2026 © Liga Férias Garantidas</p>
       </footer>
     </div>
   );
