@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
-import Table from './components/Table';      // Importado como Table
-import Matches from './components/Matches';  // Importado como Matches
+import Table from './components/Table';
+import Matches from './components/Matches';
 import Stats from './components/Stats';
 
-// LINK CORRETO
+// LINK DA API
 const API_URL = 'https://lfg-2026.onrender.com';
 
 export default function App() {
@@ -37,6 +37,9 @@ export default function App() {
         const dataClass = await resClass.json();
         const dataCal = await resCal.json();
         const dataStats = await resStats.json();
+
+        // LOG PARA CONFIRMAR NO CONSOLE
+        console.log("Dados Recebidos:", { dataClass, dataCal, dataStats });
 
         setClassificacao(dataClass);
         setCalendario(dataCal);
@@ -87,10 +90,10 @@ export default function App() {
       <main className="flex-grow w-full max-w-4xl mx-auto px-4 py-6">
         
         {/* Container dos Cards */}
-        <div className="bg-card-bg rounded-xl shadow-lg border border-white/5 overflow-hidden w-full">
+        <div className="bg-card-bg rounded-xl shadow-lg border border-white/5 overflow-hidden w-full flex flex-col">
           
           {/* Navegação de Abas */}
-          <div className="flex w-full border-b border-white/10">
+          <div className="flex w-full border-b border-white/10 shrink-0">
             <button
               onClick={() => setActiveTab('tabela')}
               className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider text-center transition-colors ${
@@ -118,28 +121,29 @@ export default function App() {
           </div>
 
           {/* Área de Conteúdo */}
-          <div className="p-4 md:p-6 min-h-[400px]">
+          {/* AQUI ESTAVA O PROBLEMA DO LAYOUT DO STATS: */}
+          {/* Adicionei 'flex-grow' e removi restrições rígidas */}
+          <div className="p-0 w-full bg-card-bg"> 
             
-            {/* Lógica de Exibição Corrigida */}
             {activeTab === 'tabela' && (
-              classificacao.length > 0 ? (
-                // AQUI ESTAVA O ERRO: Tabela -> Table
-                <Table classificacao={classificacao} />
-              ) : (
-                <div className="text-center py-10 text-gray-500">
-                  <p>A Tabela está sendo processada...</p>
-                  <p className="text-xs mt-2">(Aguardando atualização oficial do Cartola)</p>
-                </div>
-              )
+              <div className="p-4 md:p-6">
+                 {/* CORREÇÃO 1: props agora é data={} */}
+                 <Table data={classificacao} />
+              </div>
             )}
 
             {activeTab === 'confrontos' && (
-               // AQUI ESTAVA O ERRO: Confrontos -> Matches
-               <Matches calendario={calendario || {}} />
+              <div className="p-4 md:p-6">
+                 {/* CORREÇÃO 2: props agora é data={} */}
+                 <Matches data={calendario || {}} />
+              </div>
             )}
 
-            {activeTab === 'estatisticas' && (
-               <Stats data={stats} />
+            {activeTab === 'estatisticas' && stats && (
+               /* Wrapper específico para Stats não quebrar */
+               <div className="w-full overflow-x-auto p-4">
+                  <Stats data={stats} />
+               </div>
             )}
 
           </div>
@@ -147,7 +151,7 @@ export default function App() {
       </main>
 
       <footer className="text-center text-gray-600 text-xs py-6">
-        <p>LFG 2026 © Liga Férias Garantidas</p>
+        <p>LFG 2026 © League Fantasy Game</p>
       </footer>
     </div>
   );
