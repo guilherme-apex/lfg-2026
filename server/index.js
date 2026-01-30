@@ -1,12 +1,14 @@
 const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
 const axios = require('axios');
+const path = require('path');
+const fs = require('fs');
+const cors = require('cors'); // <--- 1. ADICIONE ESSA LINHA NOS IMPORTS
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
+app.use(express.json());
 
 // --- 1. MAPEAMENTO DE IDs (CONFIRMADO) ---
 const TEAM_IDS = {
