@@ -6,7 +6,7 @@ import Stats from './components/Stats';
 
 // --- CONFIGURAÇÃO DA API (A MÁGICA ACONTECE AQUI) ---
 // Se estiver na Vercel, usa a variável de ambiente. Se estiver no PC, usa localhost.
-const API_URL = 'https://lfg-2026.onrender.com/';
+const API_URL = 'https://lfg-api-2026.onrender.com';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('tabela');
