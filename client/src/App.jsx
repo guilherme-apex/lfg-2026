@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
-import Tabela from './components/Table';        
-import Confrontos from './components/Matches';
+import Tabela from './components/Table';        // Mantendo o nome que funcionou
+import Confrontos from './components/Mataches'; // Mantendo o nome que funcionou
 import Stats from './components/Stats';
 
-// --- CONFIGURAÇÃO DA API (A MÁGICA ACONTECE AQUI) ---
-// Se estiver na Vercel, usa a variável de ambiente. Se estiver no PC, usa localhost.
+// LINK CORRETO QUE VOCÊ CONFIRMOU
 const API_URL = 'https://lfg-2026.onrender.com';
 
 export default function App() {
@@ -16,25 +15,23 @@ export default function App() {
   const [calendario, setCalendario] = useState({});
   const [stats, setStats] = useState(null);
 
-  // Estados de Controle
+  // Estados
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("🏀 LFG System: Conectando em:", API_URL);
+        console.log("🏀 LFG: Buscando dados em:", API_URL);
 
-        // Dispara as 3 requisições ao mesmo tempo para ser mais rápido
         const [resClass, resCal, resStats] = await Promise.all([
           fetch(`${API_URL}/api/classificacao`),
           fetch(`${API_URL}/api/calendario`),
           fetch(`${API_URL}/api/estatisticas`)
         ]);
 
-        // Verifica se deu erro em alguma delas
         if (!resClass.ok || !resCal.ok || !resStats.ok) {
-          throw new Error("Falha na resposta do servidor (Render).");
+          throw new Error("Erro ao buscar dados da API.");
         }
 
         const dataClass = await resClass.json();
@@ -44,13 +41,10 @@ export default function App() {
         setClassificacao(dataClass);
         setCalendario(dataCal);
         setStats(dataStats);
-        
-        // Remove o loading e garante que não tem erro
         setLoading(false);
-        setError(null);
 
       } catch (err) {
-        console.error("❌ Erro fatal no App:", err);
+        console.error("Erro:", err);
         setError(err.message);
         setLoading(false);
       }
@@ -59,90 +53,100 @@ export default function App() {
     fetchData();
   }, []);
 
-  // --- TELA DE CARREGAMENTO ---
+  // --- LOADING ---
   if (loading) {
     return (
       <div className="min-h-screen bg-dark-bg text-white flex flex-col items-center justify-center p-4">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-lfg-green mb-4"></div>
-        <p className="animate-pulse font-bold text-lg">Carregando temporada 2026...</p>
-        <p className="text-xs text-gray-500 mt-2">Conectando ao servidor...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-lfg-green mb-4"></div>
+        <p className="font-bold">Carregando LFG 2026...</p>
       </div>
     );
   }
 
-  // --- TELA DE ERRO (SE A CONEXÃO FALHAR) ---
+  // --- ERRO ---
   if (error) {
     return (
       <div className="min-h-screen bg-dark-bg text-white flex flex-col items-center justify-center p-4 text-center">
-        <div className="bg-red-900/20 border border-red-500/50 p-8 rounded-xl max-w-md backdrop-blur-sm">
-          <div className="text-4xl mb-4">🔌</div>
-          <h2 className="text-xl font-bold text-red-400 mb-2">Falha na Conexão</h2>
-          <p className="text-gray-300 mb-4 text-sm">
-            Não conseguimos falar com o servidor. O Render pode estar "dormindo" (Free Tier).
-          </p>
-          <div className="bg-black/50 p-3 rounded text-xs font-mono text-left mb-4">
-            <p className="text-gray-500">Tentativa em:</p>
-            <p className="text-yellow-400 break-all">{API_URL}</p>
-            <p className="text-gray-500 mt-2">Erro:</p>
-            <p className="text-red-300">{error}</p>
-          </div>
-          <button 
-            onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-lfg-green text-dark-bg font-bold rounded hover:bg-green-400 transition-colors"
-          >
-            Tentar Novamente
-          </button>
-        </div>
+        <h2 className="text-xl font-bold text-red-400 mb-2">Erro de Conexão</h2>
+        <p className="text-gray-300 mb-4">{error}</p>
+        <button onClick={() => window.location.reload()} className="px-6 py-2 bg-gray-700 rounded">Recarregar</button>
       </div>
     );
   }
 
-  // --- APLICAÇÃO PRINCIPAL ---
+  // --- APP PRINCIPAL (LAYOUT SEGURO) ---
   return (
-    <div className="min-h-screen bg-dark-bg text-gray-100 font-sans pb-12">
-      <Header />
+    <div className="min-h-screen bg-dark-bg text-gray-100 font-sans pb-12 flex flex-col">
+      
+      {/* 1. HEADER (Fixo no topo da estrutura) */}
+      <div className="w-full">
+        <Header />
+      </div>
 
-      <main className="max-w-4xl mx-auto px-4 -mt-6 relative z-10">
-        <div className="bg-card-bg rounded-xl shadow-lg border border-white/5 overflow-hidden min-h-[500px]">
-          {/* Navegação de Abas */}
-          <div className="flex border-b border-white/10">
+      {/* 2. CONTEÚDO (Com margem segura para não invadir) */}
+      <main className="flex-grow w-full max-w-4xl mx-auto px-4 py-6">
+        
+        {/* Container dos Cards */}
+        <div className="bg-card-bg rounded-xl shadow-lg border border-white/5 overflow-hidden w-full">
+          
+          {/* Navegação de Abas (Forçando largura total) */}
+          <div className="flex w-full border-b border-white/10">
             <button
               onClick={() => setActiveTab('tabela')}
-              className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider transition-colors ${
-                activeTab === 'tabela' ? 'bg-lfg-green text-dark-bg' : 'text-gray-400 hover:text-white hover:bg-white/5'
+              className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider text-center transition-colors ${
+                activeTab === 'tabela' ? 'bg-lfg-green text-dark-bg' : 'text-gray-400 hover:bg-white/5'
               }`}
             >
-              Classificação
+              Tabela
             </button>
             <button
               onClick={() => setActiveTab('confrontos')}
-              className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider transition-colors ${
-                activeTab === 'confrontos' ? 'bg-lfg-green text-dark-bg' : 'text-gray-400 hover:text-white hover:bg-white/5'
+              className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider text-center transition-colors ${
+                activeTab === 'confrontos' ? 'bg-lfg-green text-dark-bg' : 'text-gray-400 hover:bg-white/5'
               }`}
             >
-              Confrontos
+              Jogos
             </button>
             <button
               onClick={() => setActiveTab('estatisticas')}
-              className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider transition-colors ${
-                activeTab === 'estatisticas' ? 'bg-lfg-green text-dark-bg' : 'text-gray-400 hover:text-white hover:bg-white/5'
+              className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider text-center transition-colors ${
+                activeTab === 'estatisticas' ? 'bg-lfg-green text-dark-bg' : 'text-gray-400 hover:bg-white/5'
               }`}
             >
-              Estatísticas
+              Stats
             </button>
           </div>
 
-          {/* Conteúdo das Abas */}
-          <div className="p-4 md:p-6 animate-fade-in">
-            {activeTab === 'tabela' && <Tabela classificacao={classificacao} />}
-            {activeTab === 'confrontos' && <Confrontos calendario={calendario} />}
-            {activeTab === 'estatisticas' && <Stats data={stats} />}
+          {/* Área de Conteúdo */}
+          <div className="p-4 md:p-6 min-h-[400px]">
+            
+            {/* Lógica de Exibição Segura */}
+            {activeTab === 'tabela' && (
+              classificacao.length > 0 ? (
+                <Tabela classificacao={classificacao} />
+              ) : (
+                <div className="text-center py-10 text-gray-500">
+                  <p>A Tabela está sendo processada...</p>
+                  <p className="text-xs mt-2">(Aguardando atualização oficial do Cartola)</p>
+                </div>
+              )
+            )}
+
+            {activeTab === 'confrontos' && (
+               /* Passando uma prop vazia se não tiver dados pra não quebrar */
+               <Confrontos calendario={calendario || {}} />
+            )}
+
+            {activeTab === 'estatisticas' && (
+               <Stats data={stats} />
+            )}
+
           </div>
         </div>
       </main>
 
-      <footer className="text-center text-gray-600 text-xs py-8 mt-4">
-        <p>LFG 2026 © Desenvolvido com dados oficiais do Cartola FC</p>
+      <footer className="text-center text-gray-600 text-xs py-6">
+        <p>LFG 2026 © League Fantasy Game</p>
       </footer>
     </div>
   );
