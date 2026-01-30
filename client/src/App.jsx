@@ -1,55 +1,57 @@
 import React, { useState, useEffect } from 'react';
-
-// --- COMPONENTES VISUAIS (Mantendo os mesmos) ---
-// (Vou simplificar os imports aqui para focar na lógica, mas mantenha seus imports de componentes se estiverem em arquivos separados)
-// Se você tem os componentes Stats, Tabela, Confrontos no mesmo arquivo ou importados, mantenha-os.
-// Vou assumir que você está importando eles:
 import Header from './components/Header';
-import Stats from './components/Stats';
-import Confrontos from './components/Confrontos';
 import Tabela from './components/Tabela';
+import Confrontos from './components/Confrontos';
+import Stats from './components/Stats';
 
-// --- CONFIGURAÇÃO DA API ---
+// --- CONFIGURAÇÃO DA API (A MÁGICA ACONTECE AQUI) ---
+// Se estiver na Vercel, usa a variável de ambiente. Se estiver no PC, usa localhost.
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('tabela');
+  
+  // Dados
   const [classificacao, setClassificacao] = useState([]);
   const [calendario, setCalendario] = useState({});
   const [stats, setStats] = useState(null);
-  
-  // ESTADOS DE DIAGNÓSTICO
+
+  // Estados de Controle
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Função para carregar tudo de uma vez
     const fetchData = async () => {
       try {
-        console.log("Tentando conectar em:", API_URL); // Log no console
+        console.log("🏀 LFG System: Conectando em:", API_URL);
 
-        // 1. Busca Classificação
-        const resClass = await fetch(`${API_URL}/api/classificacao`);
-        if (!resClass.ok) throw new Error(`Erro Classificação: ${resClass.status}`);
+        // Dispara as 3 requisições ao mesmo tempo para ser mais rápido
+        const [resClass, resCal, resStats] = await Promise.all([
+          fetch(`${API_URL}/api/classificacao`),
+          fetch(`${API_URL}/api/calendario`),
+          fetch(`${API_URL}/api/estatisticas`)
+        ]);
+
+        // Verifica se deu erro em alguma delas
+        if (!resClass.ok || !resCal.ok || !resStats.ok) {
+          throw new Error("Falha na resposta do servidor (Render).");
+        }
+
         const dataClass = await resClass.json();
-        setClassificacao(dataClass);
-
-        // 2. Busca Calendário
-        const resCal = await fetch(`${API_URL}/api/calendario`);
-        if (!resCal.ok) throw new Error(`Erro Calendário: ${resCal.status}`);
         const dataCal = await resCal.json();
-        setCalendario(dataCal);
-
-        // 3. Busca Estatísticas
-        const resStats = await fetch(`${API_URL}/api/estatisticas`);
-        if (!resStats.ok) throw new Error(`Erro Stats: ${resStats.status}`);
         const dataStats = await resStats.json();
-        setStats(dataStats);
 
-        setLoading(false); // Sucesso!
+        setClassificacao(dataClass);
+        setCalendario(dataCal);
+        setStats(dataStats);
+        
+        // Remove o loading e garante que não tem erro
+        setLoading(false);
+        setError(null);
+
       } catch (err) {
-        console.error("ERRO FATAL:", err);
-        setErrorMsg(err.message); // Salva o erro para mostrar na tela
+        console.error("❌ Erro fatal no App:", err);
+        setError(err.message);
         setLoading(false);
       }
     };
@@ -57,39 +59,36 @@ export default function App() {
     fetchData();
   }, []);
 
-  // --- TELA DE CARREGAMENTO / ERRO ---
+  // --- TELA DE CARREGAMENTO ---
   if (loading) {
     return (
       <div className="min-h-screen bg-dark-bg text-white flex flex-col items-center justify-center p-4">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-lfg-green mb-4"></div>
-        <p>Acessando servidor em: <span className="font-mono text-yellow-400 text-sm">{API_URL}</span></p>
-        <p className="text-gray-500 text-sm mt-2">Segura a bola...</p>
+        <p className="animate-pulse font-bold text-lg">Carregando temporada 2026...</p>
+        <p className="text-xs text-gray-500 mt-2">Conectando ao servidor...</p>
       </div>
     );
   }
 
-  // --- TELA DE ERRO (O RAIO-X) ---
-  if (errorMsg) {
+  // --- TELA DE ERRO (SE A CONEXÃO FALHAR) ---
+  if (error) {
     return (
       <div className="min-h-screen bg-dark-bg text-white flex flex-col items-center justify-center p-4 text-center">
-        <div className="bg-red-900/50 border border-red-500 p-6 rounded-xl max-w-lg">
-          <h1 className="text-2xl font-bold text-red-400 mb-4">🚫 Falta Técnica! (Erro)</h1>
-          <p className="mb-2">O site não conseguiu falar com o backend.</p>
-          
-          <div className="bg-black/50 p-4 rounded text-left font-mono text-xs mb-4 overflow-x-auto">
-            <p className="text-gray-400">URL Tentada:</p>
-            <p className="text-yellow-300 mb-2">{API_URL}</p>
-            <p className="text-gray-400">Mensagem de Erro:</p>
-            <p className="text-red-300">{errorMsg}</p>
-          </div>
-
-          <p className="text-sm text-gray-400">
-            Dica para o Guilherme: Se o erro for "Failed to fetch", verifique o CORS ou se o link do Render está certo (https).
+        <div className="bg-red-900/20 border border-red-500/50 p-8 rounded-xl max-w-md backdrop-blur-sm">
+          <div className="text-4xl mb-4">🔌</div>
+          <h2 className="text-xl font-bold text-red-400 mb-2">Falha na Conexão</h2>
+          <p className="text-gray-300 mb-4 text-sm">
+            Não conseguimos falar com o servidor. O Render pode estar "dormindo" (Free Tier).
           </p>
-          
+          <div className="bg-black/50 p-3 rounded text-xs font-mono text-left mb-4">
+            <p className="text-gray-500">Tentativa em:</p>
+            <p className="text-yellow-400 break-all">{API_URL}</p>
+            <p className="text-gray-500 mt-2">Erro:</p>
+            <p className="text-red-300">{error}</p>
+          </div>
           <button 
             onClick={() => window.location.reload()}
-            className="mt-4 px-6 py-2 bg-lfg-green text-dark-bg font-bold rounded hover:bg-green-400"
+            className="px-6 py-2 bg-lfg-green text-dark-bg font-bold rounded hover:bg-green-400 transition-colors"
           >
             Tentar Novamente
           </button>
@@ -98,13 +97,13 @@ export default function App() {
     );
   }
 
-  // --- TELA PRINCIPAL (SE DEU TUDO CERTO) ---
+  // --- APLICAÇÃO PRINCIPAL ---
   return (
     <div className="min-h-screen bg-dark-bg text-gray-100 font-sans pb-12">
       <Header />
 
       <main className="max-w-4xl mx-auto px-4 -mt-6 relative z-10">
-        <div className="bg-card-bg rounded-xl shadow-lg border border-white/5 overflow-hidden">
+        <div className="bg-card-bg rounded-xl shadow-lg border border-white/5 overflow-hidden min-h-[500px]">
           {/* Navegação de Abas */}
           <div className="flex border-b border-white/10">
             <button
@@ -134,7 +133,7 @@ export default function App() {
           </div>
 
           {/* Conteúdo das Abas */}
-          <div className="p-4 md:p-6">
+          <div className="p-4 md:p-6 animate-fade-in">
             {activeTab === 'tabela' && <Tabela classificacao={classificacao} />}
             {activeTab === 'confrontos' && <Confrontos calendario={calendario} />}
             {activeTab === 'estatisticas' && <Stats data={stats} />}
