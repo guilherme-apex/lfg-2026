@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
-import Tabela from './components/Table';        // Mantendo o nome que funcionou
-import Confrontos from './components/Mataches'; // Mantendo o nome que funcionou
+import Table from './components/Table';
+import Matches from './components/Matches';
 import Stats from './components/Stats';
 
 // LINK CORRETO QUE VOCÊ CONFIRMOU
