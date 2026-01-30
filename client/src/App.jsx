@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
-import Tabela from './components/Tabela';
-import Confrontos from './components/Confrontos';
+import Tabela from './components/Table';        
+import Confrontos from './components/Matches';
 import Stats from './components/Stats';
 
 // --- CONFIGURAÇÃO DA API (A MÁGICA ACONTECE AQUI) ---
