@@ -1,141 +1,165 @@
 import React from 'react';
 
 export default function Stats({ data }) {
-  // 1. LOADING STATE: Se os dados ainda não chegaram, mostra o aquecimento
+  // LOADING STATE
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-gray-500 animate-pulse">
         <div className="text-4xl mb-4">🏀</div>
-        <p className="text-lg font-bold">Analisando Estatísticas...</p>
-        <span className="text-sm">Aguardando dados do servidor</span>
+        <p className="text-lg font-bold">Processando Estatísticas...</p>
       </div>
     );
   }
 
-  // Desestruturação com valores padrão
   const { saf, probabilities, streaks } = data;
+  
+  // Garante que streaks existam para não quebrar
   const winStreak = streaks?.win || { count: 0, teams: [] };
   const loseStreak = streaks?.lose || { count: 0, teams: [] };
 
-  // --- LÓGICA DE VISUALIZAÇÃO DOS NOMES ---
-  // Se tiver streak (>0), mostra o nome do time(s). Se não, mostra o título padrão.
-  const winLabel = winStreak.count > 0 
-      ? winStreak.teams.map(t => t.nome).join(', ') 
-      : "Invencibilidade";
-
-  const loseLabel = loseStreak.count > 0 
-      ? loseStreak.teams.map(t => t.nome).join(', ') 
-      : "Seca de Vitórias";
+  // --- REGRA DE FILTRO: Só exibe se a sequência for >= 2 jogos ---
+  const showWinStreak = winStreak.count >= 2;
+  const showLoseStreak = loseStreak.count >= 2;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-12 animate-fade-in">
+    <div className="space-y-6 pb-12 animate-fade-in w-full">
       
-      {/* CARD 1: O DONO DA BOLA (SAF / RICO) */}
-      <div className="bg-card-bg border border-white/10 rounded-xl p-6 shadow-lg relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-          <span className="text-6xl">💰</span>
-        </div>
-        <h3 className="text-lfg-green font-bold uppercase tracking-widest text-sm mb-4">Maior Patrimônio (SAF)</h3>
+      {/* 1. LINHA SUPERIOR: SAF & SEQUÊNCIAS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {saf ? (
-            <div className="flex items-center gap-4">
-                {saf.escudo ? (
-                    <img src={saf.escudo} alt={saf.nome} className="w-16 h-16 object-contain drop-shadow-md" />
-                ) : (
-                    <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center text-2xl">🛡️</div>
-                )}
+        {/* CARD SAF (Maior Patrimônio) */}
+        <div className="bg-card-bg border border-white/10 rounded-xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between">
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <span className="text-8xl">💰</span>
+          </div>
+          <div>
+            <h3 className="text-lfg-green font-bold uppercase tracking-widest text-xs mb-4">Maior Patrimônio</h3>
+            {saf ? (
+              <div className="flex items-center gap-5 z-10 relative">
+                <div className="w-20 h-20 bg-dark-bg rounded-full p-2 border-2 border-green-500/30 flex items-center justify-center shrink-0">
+                   {saf.escudo ? (
+                     <img src={saf.escudo} alt={saf.nome} className="w-full h-full object-contain" />
+                   ) : (
+                     <span className="text-2xl">🛡️</span>
+                   )}
+                </div>
                 <div>
-                    <h2 className="text-2xl font-black text-white">{saf.nome}</h2>
-                    <p className="text-gray-400 text-sm">Cartoleiro: <span className="text-white">{saf.cartoleiro}</span></p>
-                    <div className="mt-2 bg-green-900/30 border border-green-500/30 rounded-lg px-3 py-1 inline-block">
-                        <span className="text-green-400 font-mono font-bold">C$ {saf.patrimonio}</span>
-                    </div>
+                  <h2 className="text-xl md:text-2xl font-black text-white leading-tight">{saf.nome}</h2>
+                  <p className="text-gray-400 text-sm mb-2">Cartoleiro: <span className="text-white font-semibold">{saf.cartoleiro}</span></p>
+                  <span className="bg-green-500/10 text-green-400 border border-green-500/20 px-3 py-1 rounded text-sm font-mono font-bold">
+                    C$ {parseFloat(saf.patrimonio).toFixed(2)}
+                  </span>
                 </div>
-            </div>
-        ) : (
-            <div className="text-gray-500 italic">Nenhum dado financeiro disponível.</div>
-        )}
-      </div>
-
-      {/* CARD 2: SEQUÊNCIAS (STREAKS) - ATUALIZADO */}
-      <div className="bg-card-bg border border-white/10 rounded-xl p-6 shadow-lg">
-        <h3 className="text-lfg-green font-bold uppercase tracking-widest text-sm mb-4">Sequências Atuais</h3>
-        
-        <div className="space-y-4">
-            {/* Winning Streak */}
-            <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                <div className="flex items-center overflow-hidden mr-4">
-                    <span className="text-2xl mr-3">🔥</span>
-                    <div className="flex flex-col overflow-hidden">
-                        {/* AQUI: Nome do time ganha destaque */}
-                        <span className="font-bold text-gray-200 truncate text-lg" title={winLabel}>
-                            {winLabel}
-                        </span>
-                        {/* Subtexto explica o que é */}
-                        <span className="text-[10px] text-gray-500 uppercase tracking-wider">
-                            {winStreak.count > 0 ? "Vitórias Seguidas" : "Nenhuma sequência ativa"}
-                        </span>
-                    </div>
-                </div>
-                <div className="text-right whitespace-nowrap">
-                    <span className="text-2xl font-black text-orange-400">{winStreak.count}</span>
-                    <span className="text-xs font-bold text-gray-500 ml-1">J</span>
-                </div>
-            </div>
-
-            {/* Losing Streak */}
-            <div className="flex justify-between items-center">
-                <div className="flex items-center overflow-hidden mr-4">
-                    <span className="text-2xl mr-3">❄️</span>
-                    <div className="flex flex-col overflow-hidden">
-                        {/* AQUI: Nome do time ganha destaque */}
-                        <span className="font-bold text-gray-200 truncate text-lg" title={loseLabel}>
-                            {loseLabel}
-                        </span>
-                        {/* Subtexto explica o que é */}
-                        <span className="text-[10px] text-gray-500 uppercase tracking-wider">
-                            {loseStreak.count > 0 ? "Jogos sem vencer" : "Nenhuma sequência ativa"}
-                        </span>
-                    </div>
-                </div>
-                <div className="text-right whitespace-nowrap">
-                    <span className="text-2xl font-black text-blue-400">{loseStreak.count}</span>
-                    <span className="text-xs font-bold text-gray-500 ml-1">J</span>
-                </div>
-            </div>
-        </div>
-      </div>
-
-      {/* CARD 3: PROBABILIDADES */}
-      <div className="col-span-1 md:col-span-2 bg-card-bg border border-white/10 rounded-xl p-6 shadow-lg">
-        <h3 className="text-lfg-green font-bold uppercase tracking-widest text-sm mb-6">Probabilidade de Título</h3>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {probabilities && probabilities.length > 0 ? (
-                probabilities.slice(0, 6).map((time, index) => (
-                    <div key={index} className="flex items-center justify-between bg-dark-bg p-3 rounded-lg border border-white/5">
-                        <div className="flex items-center gap-3">
-                            <span className={`text-lg font-bold w-6 ${index === 0 ? 'text-yellow-400' : 'text-gray-500'}`}>
-                                {index + 1}º
-                            </span>
-                            <span className="font-bold text-sm text-gray-200 truncate max-w-[120px]">{time.nome}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-24 h-2 bg-gray-700 rounded-full overflow-hidden">
-                                <div 
-                                    className="h-full bg-lfg-green" 
-                                    style={{ width: `${time.probTitulo}%` }}
-                                ></div>
-                            </div>
-                            <span className="text-xs font-mono font-bold text-lfg-green">{time.probTitulo}%</span>
-                        </div>
-                    </div>
-                ))
+              </div>
             ) : (
-                <p className="text-gray-500 col-span-3 text-center">Dados insuficientes para cálculo.</p>
+              <div className="text-gray-500 italic text-sm">Dados financeiros indisponíveis.</div>
             )}
+          </div>
+        </div>
+
+        {/* CARD SEQUÊNCIAS (Layout Flexível) */}
+        <div className="bg-card-bg border border-white/10 rounded-xl p-6 shadow-lg flex flex-col gap-6">
+          <h3 className="text-lfg-green font-bold uppercase tracking-widest text-xs">Sequências Atuais (2+ Jogos)</h3>
+          
+          {/* Sequência de Vitórias */}
+          <div className="bg-dark-bg/50 p-4 rounded-lg border border-white/5">
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🔥</span>
+                <span className="text-sm font-bold text-gray-300 uppercase">Vitórias Seguidas</span>
+              </div>
+              <div className="text-right">
+                <span className={`text-xl font-black ${showWinStreak ? 'text-orange-500' : 'text-gray-600'}`}>
+                  {showWinStreak ? winStreak.count : '-'}
+                </span>
+              </div>
+            </div>
+            
+            {/* Lista de Times (Badges) */}
+            <div className="flex flex-wrap gap-2 mt-1">
+              {showWinStreak ? (
+                winStreak.teams.map((t, idx) => (
+                  <span key={idx} className="px-2 py-1 bg-orange-500/10 border border-orange-500/20 text-orange-200 text-xs font-bold rounded uppercase whitespace-nowrap">
+                    {t.nome}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-gray-500 italic">Nenhuma sequência ativa acima de 2 jogos.</span>
+              )}
+            </div>
+          </div>
+
+          {/* Sequência de Derrotas */}
+          <div className="bg-dark-bg/50 p-4 rounded-lg border border-white/5">
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">❄️</span>
+                <span className="text-sm font-bold text-gray-300 uppercase">Seca de Vitórias</span>
+              </div>
+              <div className="text-right">
+                <span className={`text-xl font-black ${showLoseStreak ? 'text-blue-500' : 'text-gray-600'}`}>
+                  {showLoseStreak ? loseStreak.count : '-'}
+                </span>
+              </div>
+            </div>
+
+            {/* Lista de Times (Badges) */}
+            <div className="flex flex-wrap gap-2 mt-1">
+              {showLoseStreak ? (
+                loseStreak.teams.map((t, idx) => (
+                  <span key={idx} className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-200 text-xs font-bold rounded uppercase whitespace-nowrap">
+                    {t.nome}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-gray-500 italic">Nenhuma sequência ativa acima de 2 jogos.</span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* 2. PROBABILIDADE DE TÍTULO (Todos os 20 times) */}
+      <div className="bg-card-bg border border-white/10 rounded-xl p-6 shadow-lg">
+        <h3 className="text-lfg-green font-bold uppercase tracking-widest text-xs mb-6">Probabilidade de Título (Math-Based)</h3>
+        
+        {/* Grid Responsivo: 1 coluna no mobile, 2 no tablet/desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+          {probabilities && probabilities.length > 0 ? (
+            probabilities.map((time, index) => (
+              <div key={index} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded transition-colors group">
+                
+                {/* Posição */}
+                <span className={`font-mono font-bold text-sm w-6 text-right ${index < 4 ? 'text-lfg-green' : 'text-gray-600'}`}>
+                  {index + 1}º
+                </span>
+
+                {/* Nome do Time (Truncate inteligente) */}
+                <span className="flex-1 text-sm font-bold text-gray-300 group-hover:text-white truncate">
+                  {time.nome}
+                </span>
+
+                {/* Barra de Progresso e Porcentagem */}
+                <div className="flex items-center gap-3 w-1/3 md:w-2/5 justify-end">
+                  <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden flex justify-end"> {/* justify-end para alinhar a barra à direita se quiser, ou normal */}
+                     <div 
+                       className={`h-full rounded-full ${index === 0 ? 'bg-yellow-400' : 'bg-lfg-green'}`} 
+                       style={{ width: `${Math.max(time.probTitulo, 2)}%` }} // Mínimo visual de 2% para não sumir
+                     ></div>
+                  </div>
+                  <span className="text-xs font-mono font-bold text-white w-10 text-right">
+                    {time.probTitulo}%
+                  </span>
+                </div>
+
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 italic p-4">Dados insuficientes para cálculo estatístico.</p>
+          )}
+        </div>
+      </div>
+
     </div>
   );
 }

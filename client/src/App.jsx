@@ -5,7 +5,9 @@ import Matches from './components/Matches';
 import Stats from './components/Stats';
 
 // LINK DA API
-const API_URL = 'https://lfg-2026.onrender.com';
+const API_URL = import.meta.env.PROD 
+  ? 'https://lfg-2026.onrender.com' 
+  : 'http://localhost:3001';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('tabela');
@@ -20,41 +22,38 @@ export default function App() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        console.log("🏀 LFG: Buscando dados em:", API_URL);
+  const fetchData = async () => {
+    try {
+      console.log("🏀 LFG: Tentando buscar dados em:", API_URL);
 
-        const [resClass, resCal, resStats] = await Promise.all([
-          fetch(`${API_URL}/api/classificacao`),
-          fetch(`${API_URL}/api/calendario`),
-          fetch(`${API_URL}/api/estatisticas`)
-        ]);
+      const [resClass, resCal, resStats] = await Promise.all([
+        fetch(`${API_URL}/api/classificacao`),
+        fetch(`${API_URL}/api/calendario`),
+        fetch(`${API_URL}/api/estatisticas`)
+      ]);
 
-        if (!resClass.ok || !resCal.ok || !resStats.ok) {
-          throw new Error("Erro ao buscar dados da API.");
-        }
+      const dataClass = await resClass.json();
+      const dataCal = await resCal.json();
+      const dataStats = await resStats.json();
 
-        const dataClass = await resClass.json();
-        const dataCal = await resCal.json();
-        const dataStats = await resStats.json();
+      // ESSE LOG AQUI É O VAR DEFINITIVO:
+      console.log("📊 DADOS RECEBIDOS DO SERVER:", dataCal);
+      console.log("🏆 TABELA RECEBIDA:", dataClass);
 
-        // LOG PARA CONFIRMAR NO CONSOLE
-        console.log("Dados Recebidos:", { dataClass, dataCal, dataStats });
+      setClassificacao(dataClass);
+      setCalendario(dataCal);
+      setStats(dataStats);
+      setLoading(false);
 
-        setClassificacao(dataClass);
-        setCalendario(dataCal);
-        setStats(dataStats);
-        setLoading(false);
+    } catch (err) {
+      console.error("❌ ERRO NA BUSCA:", err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
 
-      } catch (err) {
-        console.error("Erro:", err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  fetchData();
+}, []);
 
   // --- LOADING ---
   if (loading) {
