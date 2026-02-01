@@ -121,7 +121,7 @@ export default function Stats({ data }) {
 
       {/* 2. PROBABILIDADE DE TÍTULO (Todos os 20 times) */}
       <div className="bg-card-bg border border-white/10 rounded-xl p-6 shadow-lg">
-        <h3 className="text-lfg-green font-bold uppercase tracking-widest text-xs mb-6">Probabilidade de Título (Math-Based)</h3>
+        <h3 className="text-lfg-green font-bold uppercase tracking-widest text-xs mb-6">Probabilidade de Título</h3>
         
         {/* Grid Responsivo: 1 coluna no mobile, 2 no tablet/desktop */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">

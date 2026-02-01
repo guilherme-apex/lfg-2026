@@ -150,7 +150,7 @@ export default function App() {
       </main>
 
       <footer className="text-center text-gray-600 text-xs py-6">
-        <p>LFG 2026 © League Fantasy Game</p>
+        <p>Liga Férias Garantidas 2026 © Produzido por: Guilherme Lopes de Souza</p>
       </footer>
     </div>
   );
