@@ -15,12 +15,9 @@ const headers = { "User-Agent": "Mozilla/5.0" };
 
 // --- VARIÁVEIS GLOBAIS ---
 let MEMORY_CACHE = null;
-let GLOBAL_STATUS = {
-    rodada_atual: 1,
-    mercado_aberto: true 
-};
+let GLOBAL_STATUS = { rodada_atual: 1, mercado_aberto: true };
 
-// --- CONFIGURAÇÕES ---
+// --- CONFIGURAÇÕES DE ESCUDOS ---
 const TEAM_CONFIG = {
     "ursinho pó ffc": { escudo: "/shields/ursinho_pó_ffc.svg" },
     "CL11 FC": { escudo: "/shields/cl11_fc.svg" },
@@ -57,7 +54,7 @@ const TEAM_IDS = {
 const normalize = (name) => name?.toLowerCase().replace(/\s+/g, ' ').trim();
 let cachedSaf = [];
 
-// --- ROBÔ DE CÁLCULO DUPLO (CAPITÃO X NORMAL) ---
+// --- ROBÔ DE CÁLCULO ---
 async function fetchCartolaData() {
     try {
         const statusRes = await axios.get('https://api.cartola.globo.com/mercado/status', { headers });
@@ -69,17 +66,36 @@ async function fetchCartolaData() {
         GLOBAL_STATUS.rodada_atual = rodada_atual;
         GLOBAL_STATUS.mercado_aberto = !isAoVivo;
 
-        console.log(`📡 Cartola: Rodada ${rodadaAlvo} | Modo: ${isAoVivo ? 'AO VIVO 🔴' : 'Consolidado 🟢'}`);
+        console.log(`📡 Cartola: Rodada ${rodadaAlvo} | Modo: ${isAoVivo ? 'AO VIVO (Automático)' : 'Consolidado'}`);
 
         let scoreMap = {};
         let mapPontuados = {};
-        
+        let clubesJaJogaram = new Set();
+
         if (isAoVivo) {
             try {
                 const rScouts = await axios.get('https://api.cartola.globo.com/atletas/pontuados', { headers });
                 mapPontuados = rScouts.data.atletas || {}; 
-                console.log(`📊 Scouts carregados: ${Object.keys(mapPontuados).length} atletas.`);
-            } catch (e) { console.log("⚠️ Erro nos scouts."); }
+
+                const rPartidas = await axios.get(`https://api.cartola.globo.com/partidas/${rodadaAlvo}`, { headers });
+                const partidas = rPartidas.data.partidas || [];
+                
+                const agora = new Date();
+
+                partidas.forEach(p => {
+                    const dataJogo = new Date(p.partida_data);
+                    // Buffer de segurança de 2 minutos
+                    const bufferTempo = 2 * 60 * 1000; 
+                    
+                    if ((dataJogo.getTime() + bufferTempo) < agora.getTime()) {
+                        clubesJaJogaram.add(p.clube_casa_id);
+                        clubesJaJogaram.add(p.clube_visitante_id);
+                    }
+                });
+
+                console.log(`🕒 ${clubesJaJogaram.size} clubes com jogos iniciados (+2min).`);
+
+            } catch (e) { console.log("⚠️ Erro nos dados."); }
         }
 
         const promises = Object.keys(TEAM_IDS).map(async (timeName) => {
@@ -91,49 +107,23 @@ async function fetchCartolaData() {
                 
                 const r = await axios.get(url, { headers });
                 
-                // CÁLCULO DUPLO
-                let pontosNormal = 0; // Soma simples (1x)
-                let pontosCapitao = 0; // Soma com bônus (1.5x)
+                let resultado = { normal: 0, capitao: 0 };
 
                 if (isAoVivo) {
-                    const atletasDoTime = r.data.atletas || [];
-                    const capitaoId = r.data.capitao_id;
-
-                    atletasDoTime.forEach(atleta => {
-                        const idAtleta = atleta.atleta_id;
-                        const dadosLive = mapPontuados[idAtleta]; 
-                        if (dadosLive) {
-                            let pts = dadosLive.pontuacao || 0;
-                            
-                            // Normal: Soma direta
-                            pontosNormal += pts;
-                            
-                            // Capitão: Aplica regra 1.5x se for o homem
-                            if (idAtleta === capitaoId) {
-                                pontosCapitao += (pts * 1.5);
-                            } else {
-                                pontosCapitao += pts;
-                            }
-                        }
-                    });
+                    // Pega o ID do Luxo direto da API
+                    const idLuxoAutomatico = r.data.reserva_luxo_id || 0;
                     
-                    // Remove decimais para visualização limpa no ao vivo
-                    pontosNormal = Math.trunc(pontosNormal);
-                    pontosCapitao = Math.trunc(pontosCapitao);
-                    
-                    if (pontosCapitao > 0) process.stdout.write(`[${timeName.substring(0,3)}:${pontosCapitao}] `);
-
+                    resultado = processarSubstituicoes(r.data, mapPontuados, timeName, clubesJaJogaram, idLuxoAutomatico);
                 } else {
-                    // Consolidado
-                    pontosNormal = r.data.pontos || 0; // O Cartola geralmente entrega o oficial (com capitão) aqui
-                    pontosCapitao = r.data.pontos || 0; 
+                    resultado.normal = r.data.pontos || 0;
+                    resultado.capitao = r.data.pontos || 0; 
                     cachedSaf.push({ nome: timeName, escudo: TEAM_CONFIG[timeName]?.escudo, patrimonio: r.data.patrimonio || 0 });
                 }
 
-                if (isAoVivo || pontosNormal > 0) {
+                if (isAoVivo || resultado.normal > 0) {
                     scoreMap[normalize(timeName)] = { 
-                        normal: pontosNormal, 
-                        capitao: pontosCapitao 
+                        normal: resultado.normal, 
+                        capitao: resultado.capitao 
                     };
                 }
             } catch (e) { }
@@ -143,6 +133,110 @@ async function fetchCartolaData() {
         console.log("\n✅ Dados Processados.");
         return { scores: scoreMap, rodadaSincronizada: rodadaAlvo };
     } catch (e) { return { scores: {}, rodadaSincronizada: null }; }
+}
+
+// --- CÉREBRO DA SUBSTITUIÇÃO (COM LUXO AUTOMÁTICO) ---
+function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogaram, idLuxoAPI) {
+    const titulares = timeData.atletas || [];
+    const reservas = timeData.reservas || [];
+    const capitaoId = timeData.capitao_id;
+
+    let titularesPorPosicao = {};
+    
+    titulares.forEach(t => {
+        const scout = mapPontuados[t.atleta_id];
+        const jogou = !!scout; 
+        const pts = scout ? (scout.pontuacao || 0) : 0;
+        
+        // Jogo iniciou?
+        const jogoIniciou = clubesJaJogaram.has(t.clube_id);
+
+        if (!titularesPorPosicao[t.posicao_id]) titularesPorPosicao[t.posicao_id] = [];
+        
+        titularesPorPosicao[t.posicao_id].push({
+            id: t.atleta_id,
+            posicao: t.posicao_id,
+            pts: pts,
+            jogou: jogou,
+            jogoIniciou: jogoIniciou, 
+            isCapitao: t.atleta_id === capitaoId,
+            ativo: true 
+        });
+    });
+
+    reservas.forEach(reserva => {
+        const scout = mapPontuados[reserva.atleta_id];
+        const jogou = !!scout;
+        const pts = scout ? (scout.pontuacao || 0) : 0;
+        
+        // Se reserva não jogou ou negativou, nem tentamos
+        if (!jogou || pts < 0) return;
+
+        const listaTitulares = titularesPorPosicao[reserva.posicao_id];
+        if (!listaTitulares) return;
+
+        // VERIFICAÇÃO AUTOMÁTICA: O ID bate com o que a API mandou?
+        const isLuxo = (reserva.atleta_id === idLuxoAPI);
+
+        if (isLuxo) {
+            // REGRA DO LUXO
+            let piorTitular = null;
+            let menorNota = 999;
+            
+            listaTitulares.forEach(t => {
+                // Só considera titular cujo jogo JÁ INICIOU.
+                if (t.ativo && t.jogoIniciou && t.pts < menorNota) {
+                    menorNota = t.pts;
+                    piorTitular = t;
+                }
+            });
+
+            if (piorTitular && pts > piorTitular.pts) {
+                piorTitular.ativo = false; 
+                reserva.entrouNoLugarDe = piorTitular;
+                reserva.pts = pts; 
+            }
+
+        } else {
+            // REGRA PADRÃO (MORTAIS):
+            const titularFantasma = listaTitulares.find(t => t.ativo && !t.jogou && t.jogoIniciou);
+            
+            if (titularFantasma) {
+                titularFantasma.ativo = false; 
+                reserva.entrouNoLugarDe = titularFantasma;
+                reserva.pts = pts;
+            }
+        }
+    });
+
+    let totalNormal = 0;
+    let totalCapitao = 0;
+
+    // Somas Finais
+    Object.values(titularesPorPosicao).flat().forEach(t => {
+        if (t.ativo) {
+            totalNormal += t.pts;
+            totalCapitao += t.isCapitao ? (t.pts * 1.5) : t.pts;
+        }
+    });
+
+    reservas.forEach(r => {
+        if (r.entrouNoLugarDe) {
+            totalNormal += r.pts;
+            if (r.entrouNoLugarDe.isCapitao) {
+                totalCapitao += (r.pts * 1.5);
+            } else {
+                totalCapitao += r.pts;
+            }
+        }
+    });
+
+    totalNormal = Math.trunc(totalNormal);
+    totalCapitao = Math.trunc(totalCapitao);
+
+    if (totalCapitao > 0) process.stdout.write(`[${timeName.substring(0,3)}:${totalCapitao}] `);
+
+    return { normal: totalNormal, capitao: totalCapitao };
 }
 
 async function syncAll() {
@@ -167,7 +261,6 @@ async function syncAll() {
                 houveMudanca = true;
                 return { 
                     ...jogo, 
-                    // PREENCHE OS DOIS CAMPOS AGORA:
                     placar_casa: casa.normal, 
                     placar_visitante: vis.normal,
                     placar_casa_capitao: casa.capitao,
@@ -190,7 +283,6 @@ syncAll();
 app.get('/api/calendario', async (req, res) => {
     console.log("⚡ Servindo dados da RAM...");
     await syncAll();
-    
     const dataToSend = JSON.parse(JSON.stringify(MEMORY_CACHE)); 
     for (const r in dataToSend) {
         dataToSend[r] = dataToSend[r].map(jogo => ({
@@ -215,12 +307,10 @@ app.get('/api/estatisticas', (req, res) => {
 });
 
 // --- FUNÇÕES MATEMÁTICAS ---
-
 function calculateStandings(calendario) {
     if (!calendario) return [];
     let tb = {};
     Object.keys(TEAM_CONFIG).forEach(t => tb[t] = { nome: t, escudo: TEAM_CONFIG[t].escudo, P:0, J:0, V:0, E:0, D:0, PF:0, PS:0, SP:0, history:[] });
-
     const rodadaIgnorada = GLOBAL_STATUS.mercado_aberto ? 999 : GLOBAL_STATUS.rodada_atual;
 
     Object.keys(calendario).forEach(r => {
@@ -233,7 +323,6 @@ function calculateStandings(calendario) {
             const v = tb[Object.keys(tb).find(k => normalize(k) === normalize(j.visitante))];
             if (!c || !v) return;
 
-            // Usa o placar padrão (NORMAL) para a tabela
             const pc = parseFloat(j.placar_casa), pv = parseFloat(j.placar_visitante);
             c.J++; v.J++; c.PF+=pc; v.PF+=pv; c.PS+=pv; v.PS+=pc; c.SP+=(pc-pv); v.SP+=(pv-pc);
             if (pc > pv) { c.V++; c.P+=3; v.D++; c.history.push('W'); v.history.push('L'); }
@@ -257,4 +346,4 @@ function calculateStreaks(tabela) {
     return { win, lose };
 }
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🔥 LFG FINAL (Captain Fix) Rodando na Porta ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🔥 LFG FINAL (Auto Luxo + Time Lock) Rodando na Porta ${PORT}`));
