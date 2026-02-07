@@ -482,4 +482,4 @@ function calculateStreaks(tabela) {
     return { win, lose };
 }
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🔥 LFG SERVER (Lógica 1x Corrigida) Rodando na Porta ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🔥 LFG SERVER (Lógica 1x Corrigida) Rodando na Porta ${PORT}`));})
