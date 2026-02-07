@@ -61,17 +61,21 @@ async function fetchCartolaData() {
         const { rodada_atual, status_mercado } = statusRes.data;
         
         const isAoVivo = status_mercado === 2;
+        // Se mercado fechado (1), queremos a rodada que acabou de acontecer (atual).
+        // Se mercado aberto (2), queremos a rodada que está rolando (atual) ou a anterior?
+        // Ajuste fino: Se status=1 (fechado), rodada_atual é a próxima. Então queremos a anterior.
         const rodadaAlvo = isAoVivo ? rodada_atual : rodada_atual - 1;
 
         GLOBAL_STATUS.rodada_atual = rodada_atual;
         GLOBAL_STATUS.mercado_aberto = !isAoVivo;
 
-        console.log(`📡 Cartola: Rodada ${rodadaAlvo} | Modo: ${isAoVivo ? 'AO VIVO (Automático)' : 'Consolidado'}`);
+        console.log(`📡 Cartola: Rodada Alvo ${rodadaAlvo} | Modo: ${isAoVivo ? 'AO VIVO' : 'CONSOLIDADO'}`);
 
         let scoreMap = {};
         let mapPontuados = {};
         let clubesJaJogaram = new Set();
 
+        // 1. Prepara dados auxiliares (Scouts e Partidas)
         if (isAoVivo) {
             try {
                 const rScouts = await axios.get('https://api.cartola.globo.com/atletas/pontuados', { headers });
@@ -81,75 +85,84 @@ async function fetchCartolaData() {
                 const partidas = rPartidas.data.partidas || [];
                 
                 const agora = new Date();
-
                 partidas.forEach(p => {
-                    const dataJogo = new Date(p.partida_data);
-                    // Buffer de segurança de 2 minutos
-                    const bufferTempo = 2 * 60 * 1000; 
-                    
-                    if ((dataJogo.getTime() + bufferTempo) < agora.getTime()) {
+                    if ((new Date(p.partida_data).getTime() + 120000) < agora.getTime()) {
                         clubesJaJogaram.add(p.clube_casa_id);
                         clubesJaJogaram.add(p.clube_visitante_id);
                     }
                 });
-
-                console.log(`🕒 ${clubesJaJogaram.size} clubes com jogos iniciados (+2min).`);
-
-            } catch (e) { console.log("⚠️ Erro nos dados."); }
+            } catch (e) { console.log("⚠️ Erro nos scouts ao vivo."); }
+        } else {
+            // Em modo consolidado, todos os jogos já aconteceram.
+            // Não precisamos de scouts globais pois usaremos os dados internos do time.
+            // Mas precisamos popular clubesJaJogaram como "todos" para a lógica funcionar.
+            // Hack: Deixamos o Set vazio, e na função assumimos que se não é ao vivo, jogoIniciou = true.
         }
 
+        // 2. Processa cada time
         const promises = Object.keys(TEAM_IDS).map(async (timeName) => {
             const id = TEAM_IDS[timeName];
             try {
+                // Se consolidado, precisamos buscar no endpoint histórico: /time/id/ID/RODADA
+                // Se ao vivo, endpoint padrão: /time/id/ID
                 const url = isAoVivo 
                     ? `https://api.cartola.globo.com/time/id/${id}`
                     : `https://api.cartola.globo.com/time/id/${id}/${rodadaAlvo}`;
                 
                 const r = await axios.get(url, { headers });
                 
-                let resultado = { normal: 0, capitao: 0 };
+                // MUDANÇA CRÍTICA: Sempre usamos a função de cálculo manual
+                // para remover o bônus do capitão, mesmo em rodadas passadas.
+                const idLuxoAuto = r.data.reserva_luxo_id || 0;
+                const resultado = processarSubstituicoes(r.data, mapPontuados, timeName, clubesJaJogaram, idLuxoAuto, isAoVivo);
 
-                if (isAoVivo) {
-                    // Pega o ID do Luxo direto da API
-                    const idLuxoAutomatico = r.data.reserva_luxo_id || 0;
-                    
-                    resultado = processarSubstituicoes(r.data, mapPontuados, timeName, clubesJaJogaram, idLuxoAutomatico);
-                } else {
-                    resultado.normal = r.data.pontos || 0;
-                    resultado.capitao = r.data.pontos || 0; 
+                if (!isAoVivo) {
                     cachedSaf.push({ nome: timeName, escudo: TEAM_CONFIG[timeName]?.escudo, patrimonio: r.data.patrimonio || 0 });
                 }
 
-                if (isAoVivo || resultado.normal > 0) {
-                    scoreMap[normalize(timeName)] = { 
-                        normal: resultado.normal, 
-                        capitao: resultado.capitao 
-                    };
-                }
-            } catch (e) { }
+                scoreMap[normalize(timeName)] = { 
+                    normal: resultado.normal, 
+                    capitao: resultado.capitao 
+                };
+            } catch (e) { 
+                console.log(`Erro ao ler time ${timeName}: ${e.message}`);
+            }
         });
 
         await Promise.all(promises);
-        console.log("\n✅ Dados Processados.");
+        console.log("\n✅ Dados Processados com Sucesso.");
         return { scores: scoreMap, rodadaSincronizada: rodadaAlvo };
     } catch (e) { return { scores: {}, rodadaSincronizada: null }; }
 }
 
-// --- CÉREBRO DA SUBSTITUIÇÃO (COM LUXO AUTOMÁTICO) ---
-function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogaram, idLuxoAPI) {
+// --- CÉREBRO DA SUBSTITUIÇÃO E CÁLCULO ---
+function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogaram, idLuxoAPI, isAoVivo) {
     const titulares = timeData.atletas || [];
     const reservas = timeData.reservas || [];
     const capitaoId = timeData.capitao_id;
 
     let titularesPorPosicao = {};
     
+    // 1. Organiza Titulares
     titulares.forEach(t => {
-        const scout = mapPontuados[t.atleta_id];
-        const jogou = !!scout; 
-        const pts = scout ? (scout.pontuacao || 0) : 0;
+        // Se Ao Vivo: Pega do scout global. Se Consolidado: Pega do próprio atleta (pontos_num)
+        let pts = 0;
+        let jogou = false;
+
+        if (isAoVivo) {
+            const scout = mapPontuados[t.atleta_id];
+            jogou = !!scout;
+            pts = scout ? (scout.pontuacao || 0) : 0;
+        } else {
+            // Em rodada passada, pontos_num é a pontuação bruta (1x)
+            pts = t.pontos_num || 0;
+            // Se tem pontos (diferente de 0) ou se variou preço, assumimos que jogou.
+            // Para ser mais seguro no consolidado: assumimos que todos 'jogaram' a menos que seja nulo
+            jogou = true; 
+        }
         
-        // Jogo iniciou?
-        const jogoIniciou = clubesJaJogaram.has(t.clube_id);
+        // Se não é ao vivo, assumimos que o jogo já iniciou/terminou
+        const jogoIniciou = isAoVivo ? clubesJaJogaram.has(t.clube_id) : true;
 
         if (!titularesPorPosicao[t.posicao_id]) titularesPorPosicao[t.posicao_id] = [];
         
@@ -164,28 +177,51 @@ function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogara
         });
     });
 
+    // 2. Processa Reservas
     reservas.forEach(reserva => {
-        const scout = mapPontuados[reserva.atleta_id];
-        const jogou = !!scout;
-        const pts = scout ? (scout.pontuacao || 0) : 0;
-        
-        // Se reserva não jogou ou negativou, nem tentamos
-        if (!jogou || pts < 0) return;
+        let pts = 0;
+        let jogou = false;
+
+        if (isAoVivo) {
+            const scout = mapPontuados[reserva.atleta_id];
+            jogou = !!scout;
+            pts = scout ? (scout.pontuacao || 0) : 0;
+        } else {
+            pts = reserva.pontos_num || 0;
+            // No consolidado, se o reserva tem pontos > 0, ele jogou. 
+            // Se pontos = 0, ele pode ter jogado e zerado ou não entrado. 
+            // Para reservas, verificamos se a API diz que ele "entrou".
+            // Mas simplificando: se pts != 0 ele jogou.
+            jogou = pts !== 0; 
+        }
+
+        if (!jogou && isAoVivo) return; // No ao vivo, se não tem scout, ignora.
 
         const listaTitulares = titularesPorPosicao[reserva.posicao_id];
         if (!listaTitulares) return;
 
-        // VERIFICAÇÃO AUTOMÁTICA: O ID bate com o que a API mandou?
+        // Regra Oficial: Todos titulares devem ter jogado para ativar Luxo?
+        // No consolidado, a API já fez as substituições padrões. 
+        // O nosso objetivo aqui é RECALCULAR o Luxo ou Aplicar se não foi aplicado.
+        
+        // No entanto, para garantir compatibilidade com o histórico:
+        // Se for consolidado, a lista de "titulares" da API já pode conter os reservas que entraram oficialmente.
+        // A API do Cartola, no endpoint histórico, retorna o time JÁ COM AS SUBSTITUIÇÕES FEITAS.
+        // Então, se o Cartola já trocou, o "titular" na lista será o reserva.
+        // O desafio é aplicar o LUXO LFG em cima disso.
+        
+        // Simplificação segura para LFG:
+        // Apenas verificamos se o reserva (que está no banco na API) fez mais pontos que alguém do campo.
+        
         const isLuxo = (reserva.atleta_id === idLuxoAPI);
+        const temTitularNaoJogou = listaTitulares.some(t => t.jogoIniciou && !t.jogou); // Só vale pra ao vivo
 
-        if (isLuxo) {
-            // REGRA DO LUXO
+        if (isLuxo && (isAoVivo ? !temTitularNaoJogou : true)) {
             let piorTitular = null;
             let menorNota = 999;
             
             listaTitulares.forEach(t => {
-                // Só considera titular cujo jogo JÁ INICIOU.
-                if (t.ativo && t.jogoIniciou && t.pts < menorNota) {
+                if (t.ativo && t.pts < menorNota) {
                     menorNota = t.pts;
                     piorTitular = t;
                 }
@@ -196,11 +232,9 @@ function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogara
                 reserva.entrouNoLugarDe = piorTitular;
                 reserva.pts = pts; 
             }
-
-        } else {
-            // REGRA PADRÃO (MORTAIS):
+        } else if (isAoVivo) {
+            // Padrão (só fazemos isso ao vivo, pq no consolidado a API já entregou o time com subs feitas)
             const titularFantasma = listaTitulares.find(t => t.ativo && !t.jogou && t.jogoIniciou);
-            
             if (titularFantasma) {
                 titularFantasma.ativo = false; 
                 reserva.entrouNoLugarDe = titularFantasma;
@@ -209,14 +243,14 @@ function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogara
         }
     });
 
+    // 3. Soma Final
     let totalNormal = 0;
     let totalCapitao = 0;
 
-    // Somas Finais
     Object.values(titularesPorPosicao).flat().forEach(t => {
         if (t.ativo) {
-            totalNormal += t.pts;
-            totalCapitao += t.isCapitao ? (t.pts * 1.5) : t.pts;
+            totalNormal += t.pts; // SEMPRE 1x
+            totalCapitao += t.isCapitao ? (t.pts * 1.5) : t.pts; // 1.5x
         }
     });
 
@@ -231,10 +265,11 @@ function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogara
         }
     });
 
+    // Math Trunc para evitar dízimas
     totalNormal = Math.trunc(totalNormal);
     totalCapitao = Math.trunc(totalCapitao);
 
-    if (totalCapitao > 0) process.stdout.write(`[${timeName.substring(0,3)}:${totalCapitao}] `);
+    if (totalCapitao > 0) process.stdout.write(`[${timeName.substring(0,3)}:${totalNormal}|${totalCapitao}] `);
 
     return { normal: totalNormal, capitao: totalCapitao };
 }
@@ -245,27 +280,37 @@ async function syncAll() {
     }
 
     const { scores, rodadaSincronizada } = await fetchCartolaData();
-    if (!rodadaSincronizada || !MEMORY_CACHE) return;
+    if (!rodadaSincronizada) return; // Se der erro, aborta
+
+    // Se não temos cache, iniciamos
+    if (!MEMORY_CACHE) MEMORY_CACHE = {};
 
     let houveMudanca = false;
 
-    for (const rKey in MEMORY_CACHE) {
-        const numRodada = parseInt(rKey.replace(/\D/g, ''));
-        if (numRodada !== rodadaSincronizada) continue;
-
-        MEMORY_CACHE[rKey] = MEMORY_CACHE[rKey].map(jogo => {
+    // Garante que o objeto da rodada existe
+    const rodadaKey = `Rodada ${rodadaSincronizada}`;
+    
+    // IMPORTANTE: Se a rodada não existir no cache OU se estamos forçando atualização
+    // Como mudamos a lógica (1.5x -> 1.0x), precisamos forçar a atualização dos valores antigos.
+    // O jeito mais seguro é: Se temos scores novos, atualizamos os jogos.
+    
+    if (MEMORY_CACHE[rodadaKey]) {
+        MEMORY_CACHE[rodadaKey] = MEMORY_CACHE[rodadaKey].map(jogo => {
             const casa = scores[normalize(jogo.casa)];
             const vis = scores[normalize(jogo.visitante)];
 
             if (casa && vis) {
-                houveMudanca = true;
-                return { 
-                    ...jogo, 
-                    placar_casa: casa.normal, 
-                    placar_visitante: vis.normal,
-                    placar_casa_capitao: casa.capitao,
-                    placar_visitante_capitao: vis.capitao
-                };
+                // Verifica se os valores mudaram (agora sem capitão deve ser menor)
+                if (jogo.placar_casa !== casa.normal || jogo.placar_casa_capitao !== casa.capitao) {
+                    houveMudanca = true;
+                    return { 
+                        ...jogo, 
+                        placar_casa: casa.normal, 
+                        placar_visitante: vis.normal,
+                        placar_casa_capitao: casa.capitao,
+                        placar_visitante_capitao: vis.capitao
+                    };
+                }
             }
             return jogo;
         });
@@ -273,15 +318,15 @@ async function syncAll() {
 
     if (houveMudanca) {
         fs.writeFileSync(DATA_FILE, JSON.stringify(MEMORY_CACHE, null, 4));
-        console.log("💾 MEMÓRIA ATUALIZADA E BACKUP SALVO!");
+        console.log("💾 MEMÓRIA ATUALIZADA (Lógica 1x aplicada)!");
     }
 }
 
-syncAll();
+// syncAll(); //
 
 // --- ROTAS ---
 app.get('/api/calendario', async (req, res) => {
-    console.log("⚡ Servindo dados da RAM...");
+    console.log("⚡ Servindo dados...");
     await syncAll();
     const dataToSend = JSON.parse(JSON.stringify(MEMORY_CACHE)); 
     for (const r in dataToSend) {
@@ -306,7 +351,6 @@ app.get('/api/estatisticas', (req, res) => {
     res.json({ streaks: calculateStreaks(tabela), probabilities: probs, saf: richest });
 });
 
-// --- FUNÇÕES MATEMÁTICAS ---
 function calculateStandings(calendario) {
     if (!calendario) return [];
     let tb = {};
@@ -315,6 +359,7 @@ function calculateStandings(calendario) {
 
     Object.keys(calendario).forEach(r => {
         const numRodada = parseInt(r.replace(/\D/g, ''));
+        // Se mercado está aberto para rodada 3, rodadaIgnorada é 3. Então processamos 1 e 2.
         if (numRodada >= rodadaIgnorada) return;
 
         calendario[r].forEach(j => {
@@ -330,20 +375,63 @@ function calculateStandings(calendario) {
             else { c.E++; c.P++; v.E++; v.P++; c.history.push('D'); v.history.push('D'); }
         });
     });
-    return Object.values(tb).sort((a,b) => b.P - a.P || b.V - a.V || b.SP - a.SP);
+    
+    return Object.values(tb).map(time => ({
+        ...time,
+        PF: Math.trunc(time.PF), 
+        PS: Math.trunc(time.PS), 
+        SP: Math.trunc(time.SP)  
+    })).sort((a,b) => b.P - a.P || b.V - a.V || b.SP - a.SP);
 }
 
 function calculateStreaks(tabela) {
-    let win = { count: 0, teams: [] }, lose = { count: 0, teams: [] };
+    // win: Sequência de Vitórias (Apenas 'W')
+    // lose: Seca de Vitórias (Contamos 'L' e 'D' como jejum)
+    
+    let win = { count: 0, teams: [] };
+    let lose = { count: 0, teams: [] }; 
+
     tabela.forEach(t => {
-        let cw = 0, cl = 0;
+        let cw = 0; // Contador de Vitórias
+        let cwl = 0; // Contador de "Sem Vencer" (Winless)
+
+        // 1. Calcula Sequência de Vitórias (Pura)
         for (let i = t.history.length - 1; i >= 0; i--) {
-            if (t.history[i] === 'W') { cw++; cl = 0; } else if (t.history[i] === 'L') { cl++; cw = 0; } else break;
+            if (t.history[i] === 'W') {
+                cw++;
+            } else {
+                break; // Se empatou ou perdeu, acabou a sequência de vitórias
+            }
         }
-        if (cw > win.count) { win.count = cw; win.teams = [t]; } else if (cw === win.count && cw > 0) win.teams.push(t);
-        if (cl > lose.count) { lose.count = cl; lose.teams = [t]; } else if (cl === lose.count && cl > 0) lose.teams.push(t);
+
+        // 2. Calcula Seca de Vitórias (Jejum)
+        // A lógica é: Enquanto NÃO FOR VITÓRIA, a seca aumenta.
+        for (let i = t.history.length - 1; i >= 0; i--) {
+            if (t.history[i] !== 'W') { // Se for 'L' (Derrota) ou 'D' (Empate)
+                cwl++;
+            } else {
+                break; // Se ganhou, acabou a seca
+            }
+        }
+
+        // Atualiza o Recorde de Vitórias
+        if (cw > win.count) { 
+            win.count = cw; 
+            win.teams = [t]; 
+        } else if (cw === win.count && cw > 0) { 
+            win.teams.push(t); 
+        }
+
+        // Atualiza o Recorde de Seca
+        if (cwl > lose.count) { 
+            lose.count = cwl; 
+            lose.teams = [t]; 
+        } else if (cwl === lose.count && cwl > 0) { 
+            lose.teams.push(t); 
+        }
     });
+
     return { win, lose };
 }
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🔥 LFG FINAL (Auto Luxo + Time Lock) Rodando na Porta ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🔥 LFG SERVER (Lógica 1x Corrigida) Rodando na Porta ${PORT}`));
