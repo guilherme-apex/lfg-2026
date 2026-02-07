@@ -12,3 +12,38 @@ body {
   margin: 0;
   min-height: 100vh;
 }
+
+/* --- ADIÇÃO: MODO CARD PARA MOBILE --- */
+@media (max-width: 768px) {
+  /* Alvo: Tabelas dentro do container de Jogos/Confrontos */
+  .mobile-card-view-container table thead {
+    display: none; /* Esconde o cabeçalho no mobile */
+  }
+
+  .mobile-card-view-container table tbody tr {
+    display: flex;
+    flex-direction: column;
+    background-color: #2a2a2a; /* Fundo do card mais claro que o fundo geral */
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem; /* Bordas arredondadas */
+    border: 1px solid #333;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  }
+
+  .mobile-card-view-container table td {
+    display: flex;
+    justify-content: center; /* Centraliza conteúdo */
+    align-items: center;
+    border-bottom: 1px solid #333;
+    padding: 0.75rem 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  .mobile-card-view-container table td:last-child {
+    border-bottom: none;
+    font-size: 0.8rem;
+    color: #9ca3af; /* Cinza para o local do jogo */
+  }
+}

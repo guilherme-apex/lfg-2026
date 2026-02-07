@@ -18,7 +18,6 @@ export default function Matches({ data }) {
 
   if (!data) return null;
   
-  // Pega os jogos da rodada selecionada
   const jogos = data[selectedRodada] || [];
 
   return (
@@ -38,7 +37,7 @@ export default function Matches({ data }) {
         </div>
 
         {/* Navegador de Rodadas */}
-        <div className="flex items-center justify-between bg-lfg-header border border-white/10 rounded-t-xl p-4">
+        <div className="flex items-center justify-between bg-lfg-header border border-white/10 rounded-t-xl p-4 mb-4">
             <button 
                 onClick={() => {
                     const idx = rodadas.indexOf(selectedRodada);
@@ -62,64 +61,80 @@ export default function Matches({ data }) {
             </button>
         </div>
 
-        {/* Lista de Jogos */}
-        <div className="bg-card-bg border border-t-0 border-white/10 rounded-b-xl overflow-hidden">
+        {/* Lista de Jogos (Cards Separados) */}
+        <div className="flex flex-col gap-4">
             {jogos.map((jogo, index) => {
-                // Lógica de Pontuação
                 const rawPc = modoCapitao ? jogo.placar_casa_capitao : jogo.placar_casa;
                 const rawPv = modoCapitao ? jogo.placar_visitante_capitao : jogo.placar_visitante;
 
-                // FIX: ParseFloat para pegar decimais se houver, ou 0 se der erro.
-                // toFixed(2) é opcional, mas garante formatação bonita.
                 const pc = parseFloat(rawPc || 0); 
                 const pv = parseFloat(rawPv || 0);
-                
-                // MUDANÇA CRÍTICA AQUI:
-                // Removi a trava. Sempre exibe o placar, mesmo que seja 0.
-                const jogoAconteceu = true; 
+
+                // --- AQUI ESTA A CORREÇÃO ---
+                // Antes: toFixed(2) -> Criava "95.68"
+                // Agora: Math.trunc() -> Cria "95" (Remove tudo após a vírgula)
+                const pcFormatted = Math.trunc(pc);
+                const pvFormatted = Math.trunc(pv);
 
                 return (
-                    <div key={index} className="flex flex-col md:flex-row items-center justify-between p-4 md:p-6 border-b border-white/5 hover:bg-white/5 transition-colors gap-4 md:gap-0">
+                    // --- CARD DO JOGO (CAIXA FECHADA) ---
+                    <div key={index} className="bg-card-bg border border-white/10 rounded-xl p-4 shadow-md relative overflow-hidden">
                         
-                        {/* Time Casa */}
-                        <div className="flex-1 flex items-center justify-center md:justify-end gap-3 w-full">
-                            <span className="text-base md:text-lg font-bold text-white text-right w-full md:w-auto truncate">{jogo.casa}</span>
-                            {jogo.escudo_casa ? (
-                                <img src={jogo.escudo_casa} alt={jogo.casa} className="w-10 h-10 md:w-12 md:h-12 object-contain shrink-0" />
-                            ) : (
-                                <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center shrink-0">🛡️</div>
-                            )}
+                        {/* Versão Desktop (Horizontal) - Escondida no Mobile */}
+                        <div className="hidden md:flex items-center justify-between">
+                            <div className="flex items-center justify-end gap-3 flex-1">
+                                <span className="text-lg font-bold text-white text-right">{jogo.casa}</span>
+                                {jogo.escudo_casa ? <img src={jogo.escudo_casa} className="w-12 h-12 object-contain" /> : <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">🛡️</div>}
+                            </div>
+
+                            <div className="mx-8 bg-black/20 px-6 py-2 rounded-lg border border-white/5">
+                                <span className={`text-2xl font-black tracking-widest ${modoCapitao ? 'text-orange-400' : 'text-lfg-green'}`}>
+                                    {pcFormatted} - {pvFormatted}
+                                </span>
+                            </div>
+
+                            <div className="flex items-center justify-start gap-3 flex-1">
+                                {jogo.escudo_visitante ? <img src={jogo.escudo_visitante} className="w-12 h-12 object-contain" /> : <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">🛡️</div>}
+                                <span className="text-lg font-bold text-white text-left">{jogo.visitante}</span>
+                            </div>
                         </div>
 
-                        {/* Placar Central */}
-                        <div className="mx-2 md:mx-8 min-w-[120px] text-center shrink-0">
-                            {jogoAconteceu ? (
-                                <div className={`border px-4 py-2 md:px-6 md:py-2 rounded-lg transition-all duration-300 ${modoCapitao ? 'bg-orange-900/20 border-orange-500/30' : 'bg-dark-bg border-white/10'}`}>
-                                    <span className={`text-xl md:text-2xl font-black tracking-widest whitespace-nowrap ${modoCapitao ? 'text-orange-400' : 'text-lfg-green'}`}>
-                                        {/* Exibe com formatação segura */}
-                                        {Number(pc).toFixed(2).replace('.00', '')} - {Number(pv).toFixed(2).replace('.00', '')}
-                                    </span>
+                        {/* Versão Mobile (Box Vertical) - Visível só no Mobile */}
+                        <div className="md:hidden flex flex-col gap-3">
+                            
+                            {/* Linha Time Casa */}
+                            <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                                <div className="flex items-center gap-3">
+                                    {jogo.escudo_casa ? <img src={jogo.escudo_casa} className="w-10 h-10 object-contain" /> : <div className="w-10 h-10 bg-gray-700 rounded-full"></div>}
+                                    <span className="font-bold text-gray-100 text-sm">{jogo.casa}</span>
                                 </div>
-                            ) : (
-                                <div className="bg-dark-bg border border-white/10 px-4 py-1 rounded-lg">
-                                    <span className="text-sm font-bold text-gray-500">v</span>
+                                <span className={`text-xl font-black ${pc > pv ? 'text-lfg-green' : 'text-white'}`}>
+                                    {pcFormatted}
+                                </span>
+                            </div>
+
+                            {/* "VS" Pequeno no meio */}
+                            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card-bg border border-white/10 rounded-full px-2 py-0.5 text-[10px] text-gray-500 font-bold tracking-widest uppercase">
+                                VS
+                            </div>
+
+                            {/* Linha Time Visitante */}
+                            <div className="flex items-center justify-between pt-1">
+                                <div className="flex items-center gap-3">
+                                    {jogo.escudo_visitante ? <img src={jogo.escudo_visitante} className="w-10 h-10 object-contain" /> : <div className="w-10 h-10 bg-gray-700 rounded-full"></div>}
+                                    <span className="font-bold text-gray-100 text-sm">{jogo.visitante}</span>
                                 </div>
-                            )}
+                                <span className={`text-xl font-black ${pv > pc ? 'text-lfg-green' : 'text-white'}`}>
+                                    {pvFormatted}
+                                </span>
+                            </div>
                         </div>
 
-                        {/* Time Visitante */}
-                        <div className="flex-1 flex items-center justify-center md:justify-start gap-3 w-full">
-                            {jogo.escudo_visitante ? (
-                                <img src={jogo.escudo_visitante} alt={jogo.visitante} className="w-10 h-10 md:w-12 md:h-12 object-contain shrink-0" />
-                            ) : (
-                                <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center shrink-0">🛡️</div>
-                            )}
-                            <span className="text-base md:text-lg font-bold text-white text-left w-full md:w-auto truncate">{jogo.visitante}</span>
-                        </div>
                     </div>
                 );
             })}
-             {jogos.length === 0 && <div className="p-8 text-center text-gray-500 font-medium">Nenhum jogo nesta rodada. (Verifique o servidor)</div>}
+            
+            {jogos.length === 0 && <div className="p-8 text-center text-gray-500 font-medium">Nenhum jogo nesta rodada.</div>}
         </div>
     </div>
   );

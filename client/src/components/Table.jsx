@@ -5,7 +5,7 @@ export default function Table({ data }) {
 
   return (
     <div className="overflow-x-auto bg-card-bg/50 rounded-xl border border-white/5">
-      <table className="w-full text-sm text-left border-collapse">
+      <table className="w-full text-sm text-left border-collapse min-w-[600px]">
         <thead className="text-gray-400 font-bold uppercase text-xs border-b border-white/10">
           <tr>
             <th className="py-4 px-3 text-center w-12">Pos</th>
@@ -14,6 +14,7 @@ export default function Table({ data }) {
             <th className="py-4 px-3 text-center">V</th>
             <th className="py-4 px-3 text-center">E</th>
             <th className="py-4 px-3 text-center">D</th>
+            {/* PF e PS aparecem no PC, ocultos no mobile para economizar espaço se quiser, ou deixe table-cell */}
             <th className="py-4 px-3 text-center hidden md:table-cell">PF</th>
             <th className="py-4 px-3 text-center hidden md:table-cell">PS</th>
             <th className="py-4 px-3 text-center text-white">SP</th>
@@ -44,15 +45,18 @@ export default function Table({ data }) {
                   ) : (
                     <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-xs">🛡️</div>
                   )}
-                  <span className="font-bold text-white text-base">{time.nome}</span>
+                  <span className="font-bold text-white text-base whitespace-nowrap">{time.nome}</span>
                 </td>
                 <td className="py-4 px-3 text-center">{time.J}</td>
                 <td className="py-4 px-3 text-center">{time.V}</td>
                 <td className="py-4 px-3 text-center">{time.E}</td>
                 <td className="py-4 px-3 text-center">{time.D}</td>
-                <td className="py-4 px-3 text-center hidden md:table-cell">{time.PF}</td>
-                <td className="py-4 px-3 text-center hidden md:table-cell">{time.PS}</td>
-                <td className="py-4 px-3 text-center font-medium">{time.SP}</td>
+                
+                {/* APLICADO MATH.TRUNC NO FRONTEND TAMBÉM POR SEGURANÇA */}
+                <td className="py-4 px-3 text-center hidden md:table-cell">{Math.trunc(time.PF)}</td>
+                <td className="py-4 px-3 text-center hidden md:table-cell">{Math.trunc(time.PS)}</td>
+                <td className="py-4 px-3 text-center font-medium">{Math.trunc(time.SP)}</td>
+                
                 <td className="py-4 px-3 text-center font-bold text-white text-lg">{time.P}</td>
                 <td className="py-4 px-4 hidden md:flex items-center justify-center gap-1 h-full mt-2">
                     {time.history.slice(-5).map((result, i) => {

@@ -4,14 +4,14 @@ import Table from './components/Table';
 import Matches from './components/Matches';
 import Stats from './components/Stats';
 
-// LINK DA API
+// LINK DA API (Inteligente: Local ou Prod)
 const API_URL = import.meta.env.PROD 
   ? 'https://lfg-2026.onrender.com' 
   : 'http://localhost:3001';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('tabela');
-  
+   
   // Dados
   const [classificacao, setClassificacao] = useState([]);
   const [calendario, setCalendario] = useState({});
@@ -21,24 +21,24 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  // Função de Busca de Dados
   const fetchData = async () => {
     try {
-      console.log("🏀 LFG: Tentando buscar dados em:", API_URL);
+      // O SEGREDO DO SUCESSO: Timestamp (?t=...)
+      // Isso obriga o navegador a baixar os dados novos AGORA.
+      const timestamp = new Date().getTime();
+      
+      console.log(`🏀 Atualizando dados... (Carimbo: ${timestamp})`);
 
       const [resClass, resCal, resStats] = await Promise.all([
-        fetch(`${API_URL}/api/classificacao`),
-        fetch(`${API_URL}/api/calendario`),
-        fetch(`${API_URL}/api/estatisticas`)
+        fetch(`${API_URL}/api/classificacao?t=${timestamp}`),
+        fetch(`${API_URL}/api/calendario?t=${timestamp}`),
+        fetch(`${API_URL}/api/estatisticas?t=${timestamp}`)
       ]);
 
       const dataClass = await resClass.json();
       const dataCal = await resCal.json();
       const dataStats = await resStats.json();
-
-      // ESSE LOG AQUI É O VAR DEFINITIVO:
-      console.log("📊 DADOS RECEBIDOS DO SERVER:", dataCal);
-      console.log("🏆 TABELA RECEBIDA:", dataClass);
 
       setClassificacao(dataClass);
       setCalendario(dataCal);
@@ -52,15 +52,23 @@ export default function App() {
     }
   };
 
-  fetchData();
-}, []);
+  useEffect(() => {
+    // 1. Busca imediata ao carregar a página
+    fetchData();
+
+    // 2. AUTO-REFRESH: Atualiza sozinho a cada 30 segundos (Placar de Aeroporto)
+    const intervalo = setInterval(fetchData, 30000);
+
+    // Limpeza ao fechar a aba
+    return () => clearInterval(intervalo);
+  }, []);
 
   // --- LOADING ---
   if (loading) {
     return (
       <div className="min-h-screen bg-dark-bg text-white flex flex-col items-center justify-center p-4">
         <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-lfg-green mb-4"></div>
-        <p className="font-bold">Carregando LFG 2026...</p>
+        <p className="font-bold">Buscando Parciais Ao Vivo...</p>
       </div>
     );
   }
@@ -71,7 +79,7 @@ export default function App() {
       <div className="min-h-screen bg-dark-bg text-white flex flex-col items-center justify-center p-4 text-center">
         <h2 className="text-xl font-bold text-red-400 mb-2">Erro de Conexão</h2>
         <p className="text-gray-300 mb-4">{error}</p>
-        <button onClick={() => window.location.reload()} className="px-6 py-2 bg-gray-700 rounded">Recarregar</button>
+        <button onClick={() => window.location.reload()} className="px-6 py-2 bg-gray-700 rounded">Tentar Novamente</button>
       </div>
     );
   }
@@ -120,26 +128,23 @@ export default function App() {
           </div>
 
           {/* Área de Conteúdo */}
-          {/* AQUI ESTAVA O PROBLEMA DO LAYOUT DO STATS: */}
-          {/* Adicionei 'flex-grow' e removi restrições rígidas */}
           <div className="p-0 w-full bg-card-bg"> 
             
             {activeTab === 'tabela' && (
-              <div className="p-4 md:p-6">
-                 {/* CORREÇÃO 1: props agora é data={} */}
+              // ADIÇÃO: overflow-x-auto para a tabela grande não quebrar no mobile
+              <div className="p-4 md:p-6 w-full overflow-x-auto">
                  <Table data={classificacao} />
               </div>
             )}
 
             {activeTab === 'confrontos' && (
-              <div className="p-4 md:p-6">
-                 {/* CORREÇÃO 2: props agora é data={} */}
+              // ADIÇÃO: Classe 'mobile-card-view-container' para ativar o CSS dos cards
+              <div className="p-4 md:p-6 mobile-card-view-container">
                  <Matches data={calendario || {}} />
               </div>
             )}
 
             {activeTab === 'estatisticas' && stats && (
-               /* Wrapper específico para Stats não quebrar */
                <div className="w-full overflow-x-auto p-4">
                   <Stats data={stats} />
                </div>
@@ -150,7 +155,7 @@ export default function App() {
       </main>
 
       <footer className="text-center text-gray-600 text-xs py-6">
-        <p>Liga Férias Garantidas 2026 © Produzido por: Guilherme Lopes de Souza</p>
+        <p>LFG 2026 © League Fantasy Game | Atualização Automática</p>
       </footer>
     </div>
   );
