@@ -385,7 +385,11 @@ app.get('/api/estatisticas', (req, res) => {
     const richest = cachedSaf.length > 0 ? cachedSaf.sort((a,b) => b.patrimonio - a.patrimonio)[0] : null;
     
     // 4. Timestamp
-    const agora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const agora = new Date().toLocaleTimeString('pt-BR', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        timeZone: 'America/Sao_Paulo' // <--- A MÁGICA É ESSA LINHA
+    });
 
     res.json({ 
         streaks: calculateStreaks(tabela), 
@@ -394,7 +398,6 @@ app.get('/api/estatisticas', (req, res) => {
         saf: richest,
         lastUpdate: agora 
     });
-});
 
 function calculateStandings(calendario) {
     if (!calendario) return [];
