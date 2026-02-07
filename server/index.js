@@ -136,16 +136,15 @@ async function fetchCartolaData() {
 }
 
 // --- CÉREBRO DA SUBSTITUIÇÃO E CÁLCULO ---
-function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogaram, idLuxoAPI, isAoVivo) {
+    function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogaram, idLuxoAPI, isAoVivo) {
     const titulares = timeData.atletas || [];
     const reservas = timeData.reservas || [];
     const capitaoId = timeData.capitao_id;
 
     let titularesPorPosicao = {};
     
-    // 1. Organiza Titulares
+    // 1. Organiza Titulares e identifica status
     titulares.forEach(t => {
-        // Se Ao Vivo: Pega do scout global. Se Consolidado: Pega do próprio atleta (pontos_num)
         let pts = 0;
         let jogou = false;
 
@@ -154,14 +153,14 @@ function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogara
             jogou = !!scout;
             pts = scout ? (scout.pontuacao || 0) : 0;
         } else {
-            // Em rodada passada, pontos_num é a pontuação bruta (1x)
             pts = t.pontos_num || 0;
-            // Se tem pontos (diferente de 0) ou se variou preço, assumimos que jogou.
-            // Para ser mais seguro no consolidado: assumimos que todos 'jogaram' a menos que seja nulo
+            // No consolidado, assumimos que todos jogaram inicialmente, 
+            // a menos que a pontuação seja exatamente 0.00 E não tenha scout (difícil saber sem scout detalhado).
+            // Mas para segurança do consolidado, confiamos no pontos_num.
             jogou = true; 
         }
         
-        // Se não é ao vivo, assumimos que o jogo já iniciou/terminou
+        // Se não é ao vivo, assumimos que o jogo já aconteceu
         const jogoIniciou = isAoVivo ? clubesJaJogaram.has(t.clube_id) : true;
 
         if (!titularesPorPosicao[t.posicao_id]) titularesPorPosicao[t.posicao_id] = [];
@@ -173,6 +172,7 @@ function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogara
             jogou: jogou,
             jogoIniciou: jogoIniciou, 
             isCapitao: t.atleta_id === capitaoId,
+            preco: t.preco_num || 0, // Importante para critério de desempate
             ativo: true 
         });
     });
@@ -188,88 +188,107 @@ function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogara
             pts = scout ? (scout.pontuacao || 0) : 0;
         } else {
             pts = reserva.pontos_num || 0;
-            // No consolidado, se o reserva tem pontos > 0, ele jogou. 
-            // Se pontos = 0, ele pode ter jogado e zerado ou não entrado. 
-            // Para reservas, verificamos se a API diz que ele "entrou".
-            // Mas simplificando: se pts != 0 ele jogou.
+            // No consolidado, verifica se pontuou diferente de 0 para considerar que jogou
             jogou = pts !== 0; 
         }
 
-        if (!jogou && isAoVivo) return; // No ao vivo, se não tem scout, ignora.
+        // REGRA 2.9: "A substituição não acontecerá caso o reserva faça pontuação nula (0) ou negativa (<0)."
+        // O código anterior permitia 0. Agora barramos <= 0.
+        if ((!jogou || pts <= 0) && isAoVivo) return; 
 
         const listaTitulares = titularesPorPosicao[reserva.posicao_id];
         if (!listaTitulares) return;
 
-        // Regra Oficial: Todos titulares devem ter jogado para ativar Luxo?
-        // No consolidado, a API já fez as substituições padrões. 
-        // O nosso objetivo aqui é RECALCULAR o Luxo ou Aplicar se não foi aplicado.
-        
-        // No entanto, para garantir compatibilidade com o histórico:
-        // Se for consolidado, a lista de "titulares" da API já pode conter os reservas que entraram oficialmente.
-        // A API do Cartola, no endpoint histórico, retorna o time JÁ COM AS SUBSTITUIÇÕES FEITAS.
-        // Então, se o Cartola já trocou, o "titular" na lista será o reserva.
-        // O desafio é aplicar o LUXO LFG em cima disso.
-        
-        // Simplificação segura para LFG:
-        // Apenas verificamos se o reserva (que está no banco na API) fez mais pontos que alguém do campo.
-        
+        // Verifica regra do Luxo (cancelada se alguém não jogou)
         const isLuxo = (reserva.atleta_id === idLuxoAPI);
-        const temTitularNaoJogou = listaTitulares.some(t => t.jogoIniciou && !t.jogou); // Só vale pra ao vivo
+        const temTitularNaoJogou = listaTitulares.some(t => t.jogoIniciou && !t.jogou);
 
         if (isLuxo && (isAoVivo ? !temTitularNaoJogou : true)) {
+            // --- REGRA DE LUXO ---
+            // Substitui o pior em campo, se o reserva for melhor.
             let piorTitular = null;
             let menorNota = 999;
             
             listaTitulares.forEach(t => {
-                if (t.ativo && t.pts < menorNota) {
-                    menorNota = t.pts;
-                    piorTitular = t;
+                // Desempate Luxo: "Se um dos jogadores for capitão, ele será substituído primeiro"
+                // Aqui damos prioridade inversa (queremos achar o PIOR). 
+                // Se notas iguais, a regra diz priorizar capitão para SAIR (ser substituído).
+                if (t.ativo) {
+                    if (t.pts < menorNota) {
+                        menorNota = t.pts;
+                        piorTitular = t;
+                    } else if (t.pts === menorNota) {
+                        // Empate na pior nota: Se o atual é capitão, ele vira o alvo preferencial
+                        if (t.isCapitao) piorTitular = t;
+                    }
                 }
             });
 
+            // Só troca se a nota do reserva for MAIOR (estritamente maior)
             if (piorTitular && pts > piorTitular.pts) {
                 piorTitular.ativo = false; 
                 reserva.entrouNoLugarDe = piorTitular;
                 reserva.pts = pts; 
             }
+
         } else if (isAoVivo) {
-            // Padrão (só fazemos isso ao vivo, pq no consolidado a API já entregou o time com subs feitas)
-            const titularFantasma = listaTitulares.find(t => t.ativo && !t.jogou && t.jogoIniciou);
-            if (titularFantasma) {
-                titularFantasma.ativo = false; 
-                reserva.entrouNoLugarDe = titularFantasma;
+            // --- REGRA PADRÃO (Banco Normal) ---
+            // Substitui quem não jogou.
+            
+            // REGRA 2.9.1 - Critério de Desempate para quem sai:
+            // 1. Capitão
+            // 2. Maior Valor (implementado simplificado)
+            
+            // Filtra os fantasmas (quem não jogou)
+            const fantasmas = listaTitulares.filter(t => t.ativo && !t.jogou && t.jogoIniciou);
+            
+            if (fantasmas.length > 0) {
+                // Ordena para saber quem sai primeiro
+                fantasmas.sort((a, b) => {
+                    if (a.isCapitao) return -1; // Capitão sai primeiro (para passar a faixa)
+                    if (b.isCapitao) return 1;
+                    return b.preco - a.preco; // Critério: Maior valor sai primeiro
+                });
+
+                const titularSaindo = fantasmas[0];
+                titularSaindo.ativo = false;
+                reserva.entrouNoLugarDe = titularSaindo;
                 reserva.pts = pts;
             }
         }
     });
 
-    // 3. Soma Final
+    // 3. Soma Final (Com Herança de Capitão)
     let totalNormal = 0;
     let totalCapitao = 0;
 
     Object.values(titularesPorPosicao).flat().forEach(t => {
         if (t.ativo) {
-            totalNormal += t.pts; // SEMPRE 1x
-            totalCapitao += t.isCapitao ? (t.pts * 1.5) : t.pts; // 1.5x
+            totalNormal += t.pts; 
+            // Se ele é capitão E está ativo, multiplica
+            totalCapitao += t.isCapitao ? (t.pts * 1.5) : t.pts; 
         }
     });
 
     reservas.forEach(r => {
         if (r.entrouNoLugarDe) {
             totalNormal += r.pts;
+            
+            // REGRA 2.9.1: "se seu capitão não jogar, a braçadeira é passada para o reserva"
+            // Verificamos se quem saiu era o capitão.
             if (r.entrouNoLugarDe.isCapitao) {
-                totalCapitao += (r.pts * 1.5);
+                totalCapitao += (r.pts * 1.5); // Reserva herda a faixa e o bônus
             } else {
                 totalCapitao += r.pts;
             }
         }
     });
 
-    // Math Trunc para evitar dízimas
+    // Arredondamento final
     totalNormal = Math.trunc(totalNormal);
     totalCapitao = Math.trunc(totalCapitao);
 
-    if (totalCapitao > 0) process.stdout.write(`[${timeName.substring(0,3)}:${totalNormal}|${totalCapitao}] `);
+    if (totalCapitao > 0) process.stdout.write(`[${timeName.substring(0,3)}:${totalNormal}] `);
 
     return { normal: totalNormal, capitao: totalCapitao };
 }
