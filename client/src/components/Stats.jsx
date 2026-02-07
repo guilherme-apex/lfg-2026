@@ -11,7 +11,7 @@ export default function Stats({ data }) {
     );
   }
 
-  const { saf, probabilities, streaks } = data;
+  const { saf, probabilities, z4Risk, streaks } = data;
   
   // Garante que streaks existam para não quebrar
   const winStreak = streaks?.win || { count: 0, teams: [] };
@@ -119,45 +119,75 @@ export default function Stats({ data }) {
         </div>
       </div>
 
-      {/* 2. PROBABILIDADE DE TÍTULO (Todos os 20 times) */}
-      <div className="bg-card-bg border border-white/10 rounded-xl p-6 shadow-lg">
-        <h3 className="text-lfg-green font-bold uppercase tracking-widest text-xs mb-6">Probabilidade de Título</h3>
-        
-        {/* Grid Responsivo: 1 coluna no mobile, 2 no tablet/desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
-          {probabilities && probabilities.length > 0 ? (
-            probabilities.map((time, index) => (
-              <div key={index} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded transition-colors group">
-                
-                {/* Posição */}
-                <span className={`font-mono font-bold text-sm w-6 text-right ${index < 4 ? 'text-lfg-green' : 'text-gray-600'}`}>
-                  {index + 1}º
-                </span>
-
-                {/* Nome do Time (Truncate inteligente) */}
-                <span className="flex-1 text-sm font-bold text-gray-300 group-hover:text-white truncate">
-                  {time.nome}
-                </span>
-
-                {/* Barra de Progresso e Porcentagem */}
-                <div className="flex items-center gap-3 w-1/3 md:w-2/5 justify-end">
-                  <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden flex justify-end"> {/* justify-end para alinhar a barra à direita se quiser, ou normal */}
-                     <div 
-                       className={`h-full rounded-full ${index === 0 ? 'bg-yellow-400' : 'bg-lfg-green'}`} 
-                       style={{ width: `${Math.max(time.probTitulo, 2)}%` }} // Mínimo visual de 2% para não sumir
-                     ></div>
+      {/* 2. PROBABILIDADES E RISCOS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          {/* CARD TÍTULO (VERDE) */}
+          <div className="bg-card-bg border border-white/10 rounded-xl p-6 shadow-lg">
+            <h3 className="text-lfg-green font-bold uppercase tracking-widest text-xs mb-6">Probabilidade de Título</h3>
+            <div className="flex flex-col gap-3">
+              {probabilities && probabilities.length > 0 ? (
+                probabilities.map((time, index) => (
+                  <div key={index} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded transition-colors group">
+                    <span className={`font-mono font-bold text-sm w-6 text-right ${index < 4 ? 'text-lfg-green' : 'text-gray-600'}`}>
+                      {index + 1}º
+                    </span>
+                    <span className="flex-1 text-sm font-bold text-gray-300 group-hover:text-white truncate">
+                      {time.nome}
+                    </span>
+                    <div className="flex items-center gap-3 w-1/3 md:w-2/5 justify-end">
+                      <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden flex justify-end"> 
+                          <div 
+                            className={`h-full rounded-full ${index === 0 ? 'bg-yellow-400' : 'bg-lfg-green'}`} 
+                            style={{ width: `${Math.max(time.probTitulo, 2)}%` }} 
+                          ></div>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-white w-10 text-right">
+                        {time.probTitulo}%
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-xs font-mono font-bold text-white w-10 text-right">
-                    {time.probTitulo}%
-                  </span>
-                </div>
+                ))
+              ) : (
+                <p className="text-gray-500 italic p-4">Dados insuficientes.</p>
+              )}
+            </div>
+          </div>
 
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500 italic p-4">Dados insuficientes para cálculo estatístico.</p>
-          )}
-        </div>
+          {/* CARD Z4 (VERMELHO) - NOVO */}
+          <div className="bg-card-bg border border-red-500/20 rounded-xl p-6 shadow-lg">
+            <h3 className="text-red-500 font-bold uppercase tracking-widest text-xs mb-6 flex items-center gap-2">
+                PROBABILIDADE DE REBAIXAMENTO
+            </h3>
+            <div className="flex flex-col gap-3">
+              {z4Risk && z4Risk.length > 0 ? (
+                z4Risk.map((time, index) => (
+                  <div key={index} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded transition-colors group">
+                    <span className="font-mono font-bold text-sm w-6 text-right text-red-700">
+                      {index + 1}
+                    </span>
+                    <span className="flex-1 text-sm font-bold text-gray-300 group-hover:text-white truncate">
+                      {time.nome}
+                    </span>
+                    <div className="flex items-center gap-3 w-1/3 md:w-2/5 justify-end">
+                      <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden flex justify-start"> 
+                          <div 
+                            className="h-full rounded-full bg-red-600"
+                            style={{ width: `${time.risk}%` }} 
+                          ></div>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-red-400 w-10 text-right">
+                        {time.risk}%
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 italic p-4">Sem risco calculado.</p>
+              )}
+            </div>
+          </div>
+
       </div>
 
     </div>

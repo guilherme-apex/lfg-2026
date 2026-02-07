@@ -322,7 +322,7 @@ async function syncAll() {
     }
 }
 
-// syncAll(); //
+// syncAll(); // TRAVA DE SEGURANÇA: Usando apenas o JSON local corrigido se necessário, ou descomente para atualizar
 
 // --- ROTAS ---
 app.get('/api/calendario', async (req, res) => {
@@ -346,9 +346,35 @@ app.get('/api/classificacao', (req, res) => {
 app.get('/api/estatisticas', (req, res) => {
     const data = MEMORY_CACHE || JSON.parse(fs.readFileSync(DATA_FILE));
     const tabela = calculateStandings(data);
-    const probs = tabela.map(t => ({ nome: t.nome, probTitulo: (t.P * 1.5).toFixed(1) })).sort((a,b) => b.probTitulo - a.probTitulo);
+    
+    // 1. Probabilidade de Título
+    const probs = tabela.map(t => ({ 
+        nome: t.nome, 
+        probTitulo: (t.P * 1.5).toFixed(1) 
+    })).sort((a,b) => b.probTitulo - a.probTitulo);
+
+    // 2. Probabilidade de Rebaixamento
+    // Lógica: Comparação com a média ou distância do líder. Aqui usaremos distância do líder invertida.
+    const liderP = tabela[0]?.P || 1;
+    const z4Risk = tabela.map(t => {
+        let risco = ((1 - (t.P / liderP)) * 100).toFixed(1);
+        if (risco < 0) risco = 0;
+        return { nome: t.nome, risk: risco };
+    }).sort((a,b) => b.risk - a.risk).slice(0, 5); // Top 5 maiores riscos
+
+    // 3. Rico
     const richest = cachedSaf.length > 0 ? cachedSaf.sort((a,b) => b.patrimonio - a.patrimonio)[0] : null;
-    res.json({ streaks: calculateStreaks(tabela), probabilities: probs, saf: richest });
+    
+    // 4. Timestamp
+    const agora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    res.json({ 
+        streaks: calculateStreaks(tabela), 
+        probabilities: probs, 
+        z4Risk: z4Risk,
+        saf: richest,
+        lastUpdate: agora 
+    });
 });
 
 function calculateStandings(calendario) {

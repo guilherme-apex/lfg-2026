@@ -16,6 +16,9 @@ export default function App() {
   const [classificacao, setClassificacao] = useState([]);
   const [calendario, setCalendario] = useState({});
   const [stats, setStats] = useState(null);
+  
+  // Estado para guardar a hora da última atualização
+  const [lastUpdate, setLastUpdate] = useState("...");
 
   // Estados
   const [loading, setLoading] = useState(true);
@@ -43,6 +46,12 @@ export default function App() {
       setClassificacao(dataClass);
       setCalendario(dataCal);
       setStats(dataStats);
+      
+      // Captura o timestamp vindo da API Stats
+      if (dataStats.lastUpdate) {
+          setLastUpdate(dataStats.lastUpdate);
+      }
+
       setLoading(false);
 
     } catch (err) {
@@ -88,9 +97,16 @@ export default function App() {
   return (
     <div className="min-h-screen bg-dark-bg text-gray-100 font-sans pb-12 flex flex-col">
       
-      {/* 1. HEADER */}
-      <div className="w-full">
+      {/* 1. HEADER + TIMESTAMP */}
+      <div className="w-full relative">
         <Header />
+        {/* Timestamp Posicionado Absolutamente no Topo/Direita (Responsivo) */}
+        <div className="absolute top-2 right-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full z-20">
+            <div className="w-1.5 h-1.5 bg-lfg-green rounded-full animate-pulse"></div>
+            <span className="text-[10px] text-gray-300 font-mono tracking-tight">
+                Atualizado às {lastUpdate}h
+            </span>
+        </div>
       </div>
 
       {/* 2. CONTEÚDO */}
@@ -155,7 +171,7 @@ export default function App() {
       </main>
 
       <footer className="text-center text-gray-600 text-xs py-6">
-        <p>LFG 2026 © League Fantasy Game | Atualização Automática</p>
+        <p>LFG 2026 © Liga Férias Garantidas</p>
       </footer>
     </div>
   );
