@@ -64,7 +64,7 @@ async function fetchCartolaData() {
         // Se mercado fechado (1), queremos a rodada que acabou de acontecer (atual).
         // Se mercado aberto (2), queremos a rodada que está rolando (atual) ou a anterior?
         // Ajuste fino: Se status=1 (fechado), rodada_atual é a próxima. Então queremos a anterior.
-        const rodadaAlvo = isAoVivo ? rodada_atual : rodada_atual - 1;
+        const rodadaAlvo = (status_mercado === 1) ? rodada_atual - 1 : rodada_atual;
 
         GLOBAL_STATUS.rodada_atual = rodada_atual;
         GLOBAL_STATUS.mercado_aberto = !isAoVivo;
@@ -263,12 +263,13 @@ async function fetchCartolaData() {
     let totalCapitao = 0;
 
     Object.values(titularesPorPosicao).flat().forEach(t => {
-        if (t.ativo) {
-            totalNormal += t.pts; 
-            // Se ele é capitão E está ativo, multiplica
-            totalCapitao += t.isCapitao ? (t.pts * 1.5) : t.pts; 
-        }
-    });
+    if (t.ativo) {
+        // Truncamos cada atleta individualmente para seguir a regra de "Inteiro Puro"
+        const ptsTruncados = Math.trunc(t.pts); 
+        totalNormal += ptsTruncados; 
+        totalCapitao += t.isCapitao ? Math.trunc(ptsTruncados * 1.5) : ptsTruncados; 
+    }
+});
 
     reservas.forEach(r => {
         if (r.entrouNoLugarDe) {
@@ -294,32 +295,35 @@ async function fetchCartolaData() {
 }
 
 async function syncAll() {
+    // 1. Garante que temos o cache inicial
     if (!MEMORY_CACHE && fs.existsSync(DATA_FILE)) {
         MEMORY_CACHE = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
     }
 
+    // 2. Busca os dados novos da API
     const { scores, rodadaSincronizada } = await fetchCartolaData();
-    if (!rodadaSincronizada) return; // Se der erro, aborta
+    if (!rodadaSincronizada) return; 
 
-    // Se não temos cache, iniciamos
     if (!MEMORY_CACHE) MEMORY_CACHE = {};
 
     let houveMudanca = false;
 
-    // Garante que o objeto da rodada existe
+    // --- AQUI ESTAVA O ERRO: DEFINIÇÃO PRECISA VIR ANTES DO USO ---
     const rodadaKey = `Rodada ${rodadaSincronizada}`;
-    
-    // IMPORTANTE: Se a rodada não existir no cache OU se estamos forçando atualização
-    // Como mudamos a lógica (1.5x -> 1.0x), precisamos forçar a atualização dos valores antigos.
-    // O jeito mais seguro é: Se temos scores novos, atualizamos os jogos.
-    
+    const isRodadaPassada = rodadaSincronizada < GLOBAL_STATUS.rodada_atual;
+
     if (MEMORY_CACHE[rodadaKey]) {
         MEMORY_CACHE[rodadaKey] = MEMORY_CACHE[rodadaKey].map(jogo => {
             const casa = scores[normalize(jogo.casa)];
             const vis = scores[normalize(jogo.visitante)];
 
             if (casa && vis) {
-                // Verifica se os valores mudaram (agora sem capitão deve ser menor)
+                // TRAVA DE SEGURANÇA: Se for rodada passada e já tiver placar, ignora a API
+                if (isRodadaPassada && (jogo.placar_casa > 0 || jogo.placar_visitante > 0)) {
+                    return jogo; 
+                }
+
+                // Verifica se houve mudança nos pontos (agora usando a lógica de inteiros)
                 if (jogo.placar_casa !== casa.normal || jogo.placar_casa_capitao !== casa.capitao) {
                     houveMudanca = true;
                     return { 
@@ -337,7 +341,7 @@ async function syncAll() {
 
     if (houveMudanca) {
         fs.writeFileSync(DATA_FILE, JSON.stringify(MEMORY_CACHE, null, 4));
-        console.log("💾 MEMÓRIA ATUALIZADA (Lógica 1x aplicada)!");
+        console.log(`💾 Snapshot salvo: ${rodadaKey} atualizada.`);
     }
 }
 

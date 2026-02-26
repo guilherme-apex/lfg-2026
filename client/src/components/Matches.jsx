@@ -73,8 +73,8 @@ export default function Matches({ data }) {
                 // --- AQUI ESTA A CORREÇÃO ---
                 // Antes: toFixed(2) -> Criava "95.68"
                 // Agora: Math.trunc() -> Cria "95" (Remove tudo após a vírgula)
-                const pcFormatted = Math.trunc(pc);
-                const pvFormatted = Math.trunc(pv);
+                const pcFormatted = pc !== null && pc !== undefined ? Math.floor(pc) : '--';
+                const pvFormatted = pv !== null && pv !== undefined ? Math.floor(pv) : '--';
 
                 return (
                     // --- CARD DO JOGO (CAIXA FECHADA) ---
