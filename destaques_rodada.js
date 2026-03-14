@@ -1,58 +1,107 @@
-const axios = require('axios');
+const fs = require('fs');
 
 const TEAM_IDS = {
     "ursinho pó ffc": 44801122, "CL11 FC": 13954852, "Decc F.C": 28437271,
     "OPPURETTO FC10": 45956202, "C.E. Olhodaguense": 500739, "Pepethinaikos": 131897,
-    "jakte FC": 3708232, "BOTTONS CASCAVEL": 19989513, "Wakanda_sport_club": 11829580,
+    "jakte FC": 2731370, "BOTTONS CASCAVEL": 19989513, "Wakanda_sport_club": 11829580,
     "S.C Milagroso": 2104408, "S.E. BURROW LSU": 17898941, "LUIGIONEL MESSI": 45474101,
     "total 12 Fc": 363579, "Ronaldito": 6714, "Caximbobol FC": 44568116,
     "Everbary": 2184134, "Coringudo da Zn": 51044546, "Estreia  da Manhã": 47686055,
     "ArroganTRI/PR": 8631132, "Realdonatello": 50612459
 };
 
-const headers = { "User-Agent": "Mozilla/5.0" };
-const RODADA = 3;
+const RODADA_ALVO = 4;
+// Lembre-se de manter o caminho absoluto ou rodar dentro da pasta server!
+const ARQUIVO_JSON = 'calendario_2026.json';
 
-async function buscarDestaques() {
-    console.log(`⏳ Garimpando os box scores da Rodada ${RODADA}...\n`);
-    
-    let todosJogadores = {};
+async function buscarPontuacaoCartola(teamId, rodada) {
+    const url = `https://api.cartola.globo.com/time/id/${teamId}/${rodada}`;
+    const headers = {
+        "User-Agent": "Mozilla/5.0"
+    };
 
-    for (const [nomeTime, id] of Object.entries(TEAM_IDS)) {
-        try {
-            // Busca o time na rodada específica
-            const res = await axios.get(`https://api.cartola.globo.com/time/id/${id}/${RODADA}`, { headers });
-            const atletas = res.data.atletas || [];
-            
-            atletas.forEach(atleta => {
-                // Filtra quem fez mais de zero
-                if (atleta.pontos_num > 0) {
-                    if (!todosJogadores[atleta.atleta_id]) {
-                        todosJogadores[atleta.atleta_id] = {
-                            nome: atleta.apelido,
-                            pontos: atleta.pontos_num,
-                            times: []
-                        };
-                    }
-                    // Adiciona o time que escalou o cara
-                    todosJogadores[atleta.atleta_id].times.push(nomeTime);
-                }
-            });
-        } catch (error) {
-            console.log(`⚠️ Erro ao ler o time ${nomeTime}.`);
+    try {
+        const response = await fetch(url, { headers });
+        if (!response.ok) throw new Error("Erro HTTP");
+        
+        const data = await response.json();
+        
+        const pontosComCapitao = data.pontos || 0.0;
+        const capitaoId = data.capitao_id; 
+        let pontosCapitaoMultiplicados = 0.0;
+        
+        if (data.atletas) {
+            const capitao = data.atletas.find(a => a.atleta_id === capitaoId);
+            if (capitao) {
+                // A API entrega a pontuação do capitão já multiplicada por 1.5x
+                pontosCapitaoMultiplicados = capitao.pontos_num || 0.0;
+            }
         }
+        
+        // MATEMÁTICA CORRETA (REGRA 1.5x):
+        // Se a pontuação dele é 1.5x, o "bônus" irreal que ele deu ao time é de 0.5x.
+        // Dividir a pontuação atual por 3 nos dá exatamente o valor desse bônus extra.
+        const bonusCapitao = pontosCapitaoMultiplicados / 3;
+        
+        // Tiramos apenas o bônus, mantendo a pontuação base do jogador no time
+        const pontosSemCapitao = pontosComCapitao - bonusCapitao;
+        
+        // Truncar para remover casas decimais
+        return [Math.floor(pontosSemCapitao), Math.floor(pontosComCapitao)];
+    } catch (error) {
+        console.log(`Erro ao buscar ID ${teamId}: ${error.message}`);
+        return [0, 0];
     }
-
-    // Ordena do maior pro menor pontuador
-    const ranking = Object.values(todosJogadores)
-        .sort((a, b) => b.pontos - a.pontos)
-        .slice(0, 5); // Pega só os 5 monstros da rodada
-
-    console.log("🔥 TOP 5 JOGADORES DA RODADA E QUEM ESCALOU 🔥\n");
-    ranking.forEach((jog, index) => {
-        console.log(`${index + 1}º - ${jog.nome}: ${jog.pontos} pontos`);
-        console.log(`    Visão de jogo de: ${jog.times.join(', ')}\n`);
-    });
 }
 
-buscarDestaques();
+async function atualizarCalendario() {
+    try {
+        const fileData = fs.readFileSync(ARQUIVO_JSON, 'utf-8');
+        const calendario = JSON.parse(fileData);
+        const rodadaKey = `Rodada ${RODADA_ALVO}`;
+
+        if (!calendario[rodadaKey]) return;
+
+        const cacheTimes = {};
+        console.log(`\n🔄 RECALCULANDO RODADA ${RODADA_ALVO} COM A NOVA REGRA 1.5x...\n`);
+
+        for (let jogo of calendario[rodadaKey]) {
+            const timeCasa = jogo.casa;
+            const timeVisi = jogo.visitante;
+
+            // CASA
+            const idCasa = TEAM_IDS[timeCasa];
+            if (idCasa) {
+                if (!cacheTimes[idCasa]) {
+                    cacheTimes[idCasa] = await buscarPontuacaoCartola(idCasa, RODADA_ALVO);
+                    await new Promise(r => setTimeout(r, 300));
+                }
+                const [ptsCasaSem, ptsCasaCom] = cacheTimes[idCasa];
+                jogo.placar_casa = ptsCasaSem;
+                jogo.placar_casa_capitao = ptsCasaCom;
+            }
+
+            // VISITANTE
+            const idVisi = TEAM_IDS[timeVisi];
+            if (idVisi) {
+                if (!cacheTimes[idVisi]) {
+                    cacheTimes[idVisi] = await buscarPontuacaoCartola(idVisi, RODADA_ALVO);
+                    await new Promise(r => setTimeout(r, 300));
+                }
+                const [ptsVisiSem, ptsVisiCom] = cacheTimes[idVisi];
+                jogo.placar_visitante = ptsVisiSem;
+                jogo.placar_visitante_capitao = ptsVisiCom;
+            }
+            
+            console.log(`⚽ ${timeCasa} (${jogo.placar_casa} | ${jogo.placar_casa_capitao}) vs (${jogo.placar_visitante} | ${jogo.placar_visitante_capitao}) ${timeVisi}`);
+        }
+
+        fs.writeFileSync(ARQUIVO_JSON, JSON.stringify(calendario, null, 4), 'utf-8');
+        console.log("\n✅ Atualização corrigida salva com sucesso no calendário!");
+
+    } catch (error) {
+        console.error("Erro geral:", error);
+    }
+}
+
+atualizarCalendario();

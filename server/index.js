@@ -61,10 +61,11 @@ async function fetchCartolaData() {
         const { rodada_atual, status_mercado } = statusRes.data;
         
         const isAoVivo = status_mercado === 2;
-        // Se mercado fechado (1), queremos a rodada que acabou de acontecer (atual).
-        // Se mercado aberto (2), queremos a rodada que está rolando (atual) ou a anterior?
-        // Ajuste fino: Se status=1 (fechado), rodada_atual é a próxima. Então queremos a anterior.
+        
+        // --- CONTROLE DE RODADA ---
+        // Se quiser forçar a Rodada 5, comente a linha de baixo e descomente a "const rodadaAlvo = 5"
         const rodadaAlvo = (status_mercado === 1) ? rodada_atual - 1 : rodada_atual;
+        // const rodadaAlvo = 5; 
 
         GLOBAL_STATUS.rodada_atual = rodada_atual;
         GLOBAL_STATUS.mercado_aberto = !isAoVivo;
@@ -92,37 +93,66 @@ async function fetchCartolaData() {
                     }
                 });
             } catch (e) { console.log("⚠️ Erro nos scouts ao vivo."); }
-        } else {
-            // Em modo consolidado, todos os jogos já aconteceram.
-            // Não precisamos de scouts globais pois usaremos os dados internos do time.
-            // Mas precisamos popular clubesJaJogaram como "todos" para a lógica funcionar.
-            // Hack: Deixamos o Set vazio, e na função assumimos que se não é ao vivo, jogoIniciou = true.
         }
 
         // 2. Processa cada time
         const promises = Object.keys(TEAM_IDS).map(async (timeName) => {
             const id = TEAM_IDS[timeName];
             try {
-                // Se consolidado, precisamos buscar no endpoint histórico: /time/id/ID/RODADA
-                // Se ao vivo, endpoint padrão: /time/id/ID
                 const url = isAoVivo 
                     ? `https://api.cartola.globo.com/time/id/${id}`
                     : `https://api.cartola.globo.com/time/id/${id}/${rodadaAlvo}`;
                 
-                const r = await axios.get(url, { headers });
+                const customHeaders = { 
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" 
+                };
+
+                const r = await axios.get(url, { headers: customHeaders });
+                const dados = r.data;
                 
-                // MUDANÇA CRÍTICA: Sempre usamos a função de cálculo manual
-                // para remover o bônus do capitão, mesmo em rodadas passadas.
-                const idLuxoAuto = r.data.reserva_luxo_id || 0;
-                const resultado = processarSubstituicoes(r.data, mapPontuados, timeName, clubesJaJogaram, idLuxoAuto, isAoVivo);
+                let normal = 0;
+                let capitao = 0;
 
                 if (!isAoVivo) {
-                    cachedSaf.push({ nome: timeName, escudo: TEAM_CONFIG[timeName]?.escudo, patrimonio: r.data.patrimonio || 0 });
+                    // --- MODO CONSOLIDADO: REGRA DE TRUNCAR E TIRAR 1.5x DO CAPITÃO ---
+                    const pontosTotaisAPI = dados.pontos || 0;
+                    const capitaoId = dados.capitao_id;
+                    let pontosCapitaoBase = 0;
+                    
+                    if (dados.atletas) {
+                        const cap = dados.atletas.find(a => a.atleta_id === capitaoId);
+                        if (cap) pontosCapitaoBase = cap.pontos_num || 0;
+                    }
+                    
+                    if (dados.substituicoes) {
+                        dados.substituicoes.forEach(sub => {
+                            if (sub.saiu.atleta_id === capitaoId) {
+                                pontosCapitaoBase = sub.entrou.pontos_num || 0;
+                            }
+                        });
+                    }
+
+                    const bonusEmbutido = pontosCapitaoBase * 0.5;
+                    const ptsReaisComDecimais = pontosTotaisAPI - bonusEmbutido;
+
+                    normal = Math.trunc(ptsReaisComDecimais);
+                    capitao = Math.trunc(pontosCapitaoBase);
+
+                } else {
+                    // --- MODO AO VIVO ---
+                    const idLuxoAuto = dados.reserva_luxo_id || 0;
+                    const resultado = processarSubstituicoes(dados, mapPontuados, timeName, clubesJaJogaram, idLuxoAuto, isAoVivo);
+                    normal = resultado.normal;
+                    capitao = resultado.capitao;
+                }
+
+                if (!isAoVivo) {
+                    cachedSaf.push({ nome: timeName, escudo: TEAM_CONFIG[timeName]?.escudo, patrimonio: dados.patrimonio || 0 });
                 }
 
                 scoreMap[normalize(timeName)] = { 
-                    normal: resultado.normal, 
-                    capitao: resultado.capitao 
+                    normal: normal, 
+                    capitao: capitao 
                 };
             } catch (e) { 
                 console.log(`Erro ao ler time ${timeName}: ${e.message}`);
@@ -132,7 +162,9 @@ async function fetchCartolaData() {
         await Promise.all(promises);
         console.log("\n✅ Dados Processados com Sucesso.");
         return { scores: scoreMap, rodadaSincronizada: rodadaAlvo };
-    } catch (e) { return { scores: {}, rodadaSincronizada: null }; }
+    } catch (e) { 
+        return { scores: {}, rodadaSincronizada: null }; 
+    }
 }
 
 // --- CÉREBRO DA SUBSTITUIÇÃO E CÁLCULO ---
