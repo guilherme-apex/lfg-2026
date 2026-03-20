@@ -10,7 +10,7 @@ TEAM_IDS = {
     "ArroganTRI/PR": 8631132, "Realdonatello": 50612459
 }
 
-RODADA = 5  # <--- MUDE AQUI QUAL RODADA VOCÊ QUER AUDITAR
+RODADA = 7  # <--- MUDE AQUI QUAL RODADA VOCÊ QUER AUDITAR
 
 def gerar_auditoria():
     print(f"\n🕵️‍♂️ Rodando a auditoria DEFINITIVA E CORRETA da Rodada {RODADA}...\n")

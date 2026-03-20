@@ -60,15 +60,31 @@ async function fetchCartolaData() {
         const statusRes = await axios.get('https://api.cartola.globo.com/mercado/status', { headers });
         const { rodada_atual, status_mercado } = statusRes.data;
         
-        const isAoVivo = status_mercado === 2;
-        
-        // --- CONTROLE DE RODADA ---
-        // Se quiser forçar a Rodada 5, comente a linha de baixo e descomente a "const rodadaAlvo = 5"
-        const rodadaAlvo = (status_mercado === 1) ? rodada_atual - 1 : rodada_atual;
-        // const rodadaAlvo = 5; 
+        let isAoVivo = status_mercado === 2;
+        let rodadaAlvo = (status_mercado === 1) ? rodada_atual - 1 : rodada_atual;
 
         GLOBAL_STATUS.rodada_atual = rodada_atual;
         GLOBAL_STATUS.mercado_aberto = !isAoVivo;
+
+        // --- 🚨 SISTEMA SÊNIOR DE AUTO-CURA (SELF-HEALING) 🚨 ---
+        // Evita que rodadas fiquem zeradas se o servidor do Render dormir
+        if (MEMORY_CACHE) {
+            // Procura da Rodada 1 até a última rodada que já terminou
+            for (let r = 1; r < rodada_atual; r++) {
+                const rKey = `Rodada ${r}`;
+                if (MEMORY_CACHE[rKey] && MEMORY_CACHE[rKey].length > 0) {
+                    const primeiroJogo = MEMORY_CACHE[rKey][0];
+                    // Se a rodada já passou mas os placares estão zerados, o robô volta no tempo!
+                    if (primeiroJogo.placar_casa === 0 && primeiroJogo.placar_visitante === 0) {
+                        rodadaAlvo = r;
+                        isAoVivo = false; // Rodadas perdidas sempre são tratadas como consolidadas
+                        console.log(`🚑 AUTO-CURA ATIVADA: Resgatando a ${rKey} que ficou para trás!`);
+                        break; // Resgata uma rodada por vez para não sobrecarregar a Globo
+                    }
+                }
+            }
+        }
+        // --- FIM DO SISTEMA DE AUTO-CURA ---
 
         console.log(`📡 Cartola: Rodada Alvo ${rodadaAlvo} | Modo: ${isAoVivo ? 'AO VIVO' : 'CONSOLIDADO'}`);
 
@@ -76,7 +92,6 @@ async function fetchCartolaData() {
         let mapPontuados = {};
         let clubesJaJogaram = new Set();
 
-        // 1. Prepara dados auxiliares (Scouts e Partidas)
         if (isAoVivo) {
             try {
                 const rScouts = await axios.get('https://api.cartola.globo.com/atletas/pontuados', { headers });
@@ -95,7 +110,6 @@ async function fetchCartolaData() {
             } catch (e) { console.log("⚠️ Erro nos scouts ao vivo."); }
         }
 
-        // 2. Processa cada time
         const promises = Object.keys(TEAM_IDS).map(async (timeName) => {
             const id = TEAM_IDS[timeName];
             try {
@@ -114,7 +128,6 @@ async function fetchCartolaData() {
                 let capitao = 0;
 
                 if (!isAoVivo) {
-                    // --- MODO CONSOLIDADO: REGRA DE TRUNCAR E TIRAR 1.5x DO CAPITÃO ---
                     const pontosTotaisAPI = dados.pontos || 0;
                     const capitaoId = dados.capitao_id;
                     let pontosCapitaoBase = 0;
@@ -139,7 +152,6 @@ async function fetchCartolaData() {
                     capitao = Math.trunc(pontosCapitaoBase);
 
                 } else {
-                    // --- MODO AO VIVO ---
                     const idLuxoAuto = dados.reserva_luxo_id || 0;
                     const resultado = processarSubstituicoes(dados, mapPontuados, timeName, clubesJaJogaram, idLuxoAuto, isAoVivo);
                     normal = resultado.normal;
@@ -394,11 +406,15 @@ app.get('/api/calendario', async (req, res) => {
     res.json(dataToSend);
 });
 
-app.get('/api/classificacao', (req, res) => {
+app.get('/api/classificacao', async (req, res) => {
+    // CORREÇÃO SÊNIOR: Agora a tabela obrigatoriamente espera os placares atualizarem!
+    await syncAll(); 
     res.json(calculateStandings(MEMORY_CACHE || JSON.parse(fs.readFileSync(DATA_FILE))));
 });
 
-app.get('/api/estatisticas', (req, res) => {
+app.get('/api/estatisticas', async (req, res) => {
+    // CORREÇÃO SÊNIOR: Estatísticas também esperam a atualização.
+    await syncAll(); 
     const data = MEMORY_CACHE || JSON.parse(fs.readFileSync(DATA_FILE));
     const tabela = calculateStandings(data);
     
@@ -409,13 +425,12 @@ app.get('/api/estatisticas', (req, res) => {
     })).sort((a,b) => b.probTitulo - a.probTitulo);
 
     // 2. Probabilidade de Rebaixamento
-    // Lógica: Comparação com a média ou distância do líder. Aqui usaremos distância do líder invertida.
     const liderP = tabela[0]?.P || 1;
     const z4Risk = tabela.map(t => {
         let risco = ((1 - (t.P / liderP)) * 100).toFixed(1);
         if (risco < 0) risco = 0;
         return { nome: t.nome, risk: risco };
-    }).sort((a,b) => b.risk - a.risk).slice(0, 5); // Top 5 maiores riscos
+    }).sort((a,b) => b.risk - a.risk).slice(0, 5); 
 
     // 3. Rico
     const richest = cachedSaf.length > 0 ? cachedSaf.sort((a,b) => b.patrimonio - a.patrimonio)[0] : null;
@@ -424,7 +439,7 @@ app.get('/api/estatisticas', (req, res) => {
     const agora = new Date().toLocaleTimeString('pt-BR', { 
         hour: '2-digit', 
         minute: '2-digit',
-        timeZone: 'America/Sao_Paulo' // <--- A MÁGICA É ESSA LINHA
+        timeZone: 'America/Sao_Paulo'
     });
 
     res.json({ 
@@ -440,12 +455,17 @@ function calculateStandings(calendario) {
     if (!calendario) return [];
     let tb = {};
     Object.keys(TEAM_CONFIG).forEach(t => tb[t] = { nome: t, escudo: TEAM_CONFIG[t].escudo, P:0, J:0, V:0, E:0, D:0, PF:0, PS:0, SP:0, history:[] });
-    const rodadaIgnorada = GLOBAL_STATUS.mercado_aberto ? 999 : GLOBAL_STATUS.rodada_atual;
+    
+    // REGRA SÊNIOR: Trava a tabela para atualizar APENAS quando a rodada acaba de verdade.
+    // O Cartola só muda a rodada_atual quando o mercado abre para a próxima (apuração finalizada).
+    const rodadaLimite = GLOBAL_STATUS.rodada_atual;
 
     Object.keys(calendario).forEach(r => {
         const numRodada = parseInt(r.replace(/\D/g, ''));
-        // Se mercado está aberto para rodada 3, rodadaIgnorada é 3. Então processamos 1 e 2.
-        if (numRodada >= rodadaIgnorada) return;
+        
+        // Ignora qualquer rodada que seja igual ou maior que a atual.
+        // Isso garante que a tabela não sofra mutações ao vivo.
+        if (numRodada >= rodadaLimite) return;
 
         calendario[r].forEach(j => {
             if (j.placar_casa === 0 && j.placar_visitante === 0) return;
