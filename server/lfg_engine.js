@@ -174,140 +174,126 @@ function processarSubstituicoes(timeData, mapPontuados, timeName, clubesJaJogara
     return { normal: totalNormal, capitao: totalCapitao };
 }
 
-async function fetchCartolaData(calendario) {
-    try {
-        const statusRes = await axios.get('https://api.cartola.globo.com/mercado/status', { headers });
-        const { rodada_atual, status_mercado } = statusRes.data;
-
-        let isAoVivo = status_mercado === 2;
-        let rodadaAlvo = (status_mercado === 1) ? rodada_atual - 1 : rodada_atual;
-
-        // Auto-cura: resgata rodada passada com placar zerado
-        if (calendario) {
-            for (let r = 1; r < rodada_atual; r++) {
-                const rKey = `Rodada ${r}`;
-                if (calendario[rKey] && calendario[rKey].length > 0) {
-                    const primeiroJogo = calendario[rKey][0];
-                    if (primeiroJogo.placar_casa === 0 && primeiroJogo.placar_visitante === 0) {
-                        rodadaAlvo = r;
-                        isAoVivo = false;
-                        console.log(`AUTO-CURA: Resgatando a ${rKey}`);
-                        break;
-                    }
-                }
+function listRodadasPendentes(calendario, rodadaAtual) {
+    const pendentes = [];
+    for (let r = 1; r < rodadaAtual; r++) {
+        const jogos = calendario?.[`Rodada ${r}`];
+        if (jogos?.length > 0) {
+            const primeiro = jogos[0];
+            if (primeiro.placar_casa === 0 && primeiro.placar_visitante === 0) {
+                pendentes.push(r);
             }
         }
+    }
+    return pendentes;
+}
 
-        console.log(`Cartola: Rodada Alvo ${rodadaAlvo} | Modo: ${isAoVivo ? 'AO VIVO' : 'CONSOLIDADO'}`);
+async function fetchMercadoStatus() {
+    const statusRes = await axios.get('https://api.cartola.globo.com/mercado/status', { headers });
+    const { rodada_atual, status_mercado } = statusRes.data;
+    const isAoVivo = status_mercado === 2;
+    return {
+        rodada_atual,
+        status_mercado,
+        isAoVivo,
+        mercado_aberto: !isAoVivo,
+        rodadaAlvoPadrao: isAoVivo ? rodada_atual : Math.max(1, rodada_atual - 1)
+    };
+}
 
-        let scoreMap = {};
-        let mapPontuados = {};
-        let clubesJaJogaram = new Set();
-        const safList = [];
+/** Busca placares de todos os times para uma rodada (consolidado ou ao vivo). */
+async function fetchScoresForRodada(rodadaAlvo, isAoVivo) {
+    console.log(`Cartola: Rodada Alvo ${rodadaAlvo} | Modo: ${isAoVivo ? 'AO VIVO' : 'CONSOLIDADO'}`);
 
-        if (isAoVivo) {
-            try {
-                const rScouts = await axios.get('https://api.cartola.globo.com/atletas/pontuados', { headers });
-                mapPontuados = rScouts.data.atletas || {};
+    let scoreMap = {};
+    let mapPontuados = {};
+    let clubesJaJogaram = new Set();
+    const safList = [];
 
-                const rPartidas = await axios.get(`https://api.cartola.globo.com/partidas/${rodadaAlvo}`, { headers });
-                const partidas = rPartidas.data.partidas || [];
-                const agora = new Date();
-                partidas.forEach(p => {
-                    if ((new Date(p.partida_data).getTime() + 120000) < agora.getTime()) {
-                        clubesJaJogaram.add(p.clube_casa_id);
-                        clubesJaJogaram.add(p.clube_visitante_id);
-                    }
-                });
-            } catch (e) {
-                console.log('Erro nos scouts ao vivo.');
-            }
+    if (isAoVivo) {
+        try {
+            const rScouts = await axios.get('https://api.cartola.globo.com/atletas/pontuados', { headers });
+            mapPontuados = rScouts.data.atletas || {};
+
+            const rPartidas = await axios.get(`https://api.cartola.globo.com/partidas/${rodadaAlvo}`, { headers });
+            const partidas = rPartidas.data.partidas || [];
+            const agora = new Date();
+            partidas.forEach(p => {
+                if ((new Date(p.partida_data).getTime() + 120000) < agora.getTime()) {
+                    clubesJaJogaram.add(p.clube_casa_id);
+                    clubesJaJogaram.add(p.clube_visitante_id);
+                }
+            });
+        } catch (e) {
+            console.log('Erro nos scouts ao vivo.');
         }
+    }
 
-        const customHeaders = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        };
+    const customHeaders = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    };
 
-        const promises = Object.keys(TEAM_IDS).map(async (timeName) => {
-            const id = TEAM_IDS[timeName];
-            try {
-                const url = isAoVivo
-                    ? `https://api.cartola.globo.com/time/id/${id}`
-                    : `https://api.cartola.globo.com/time/id/${id}/${rodadaAlvo}`;
+    const promises = Object.keys(TEAM_IDS).map(async (timeName) => {
+        const id = TEAM_IDS[timeName];
+        try {
+            const url = isAoVivo
+                ? `https://api.cartola.globo.com/time/id/${id}`
+                : `https://api.cartola.globo.com/time/id/${id}/${rodadaAlvo}`;
 
-                const r = await axios.get(url, { headers: customHeaders });
-                const dados = r.data;
+            const r = await axios.get(url, { headers: customHeaders });
+            const dados = r.data;
 
-                let normal = 0;
-                let capitao = 0;
+            let normal = 0;
+            let capitao = 0;
 
-                if (!isAoVivo) {
-                    const pontosTotaisAPI = dados.pontos || 0;
-                    const capitaoId = dados.capitao_id;
-                    let pontosCapitaoBase = 0;
+            if (!isAoVivo) {
+                const pontosTotaisAPI = dados.pontos || 0;
+                const capitaoId = dados.capitao_id;
+                let pontosCapitaoBase = 0;
 
-                    if (dados.atletas) {
-                        const cap = dados.atletas.find(a => a.atleta_id === capitaoId);
-                        if (cap) pontosCapitaoBase = cap.pontos_num || 0;
-                    }
-
-                    if (dados.substituicoes) {
-                        dados.substituicoes.forEach(sub => {
-                            if (sub.saiu.atleta_id === capitaoId) {
-                                pontosCapitaoBase = sub.entrou.pontos_num || 0;
-                            }
-                        });
-                    }
-
-                    const bonusEmbutido = pontosCapitaoBase * 0.5;
-                    const ptsReaisComDecimais = pontosTotaisAPI - bonusEmbutido;
-                    normal = Math.trunc(ptsReaisComDecimais);
-                    capitao = Math.trunc(pontosCapitaoBase);
-                } else {
-                    const idLuxoAuto = dados.reserva_luxo_id || 0;
-                    const resultado = processarSubstituicoes(
-                        dados, mapPontuados, timeName, clubesJaJogaram, idLuxoAuto, isAoVivo
-                    );
-                    normal = resultado.normal;
-                    capitao = resultado.capitao;
+                if (dados.atletas) {
+                    const cap = dados.atletas.find(a => a.atleta_id === capitaoId);
+                    if (cap) pontosCapitaoBase = cap.pontos_num || 0;
                 }
 
-                if (!isAoVivo) {
-                    safList.push({
-                        nome: timeName,
-                        escudo: TEAM_CONFIG[timeName]?.escudo,
-                        patrimonio: dados.patrimonio || 0
+                if (dados.substituicoes) {
+                    dados.substituicoes.forEach(sub => {
+                        if (sub.saiu.atleta_id === capitaoId) {
+                            pontosCapitaoBase = sub.entrou.pontos_num || 0;
+                        }
                     });
                 }
 
-                scoreMap[normalize(timeName)] = { normal, capitao };
-            } catch (e) {
-                console.log(`Erro ao ler time ${timeName}: ${e.message}`);
+                const bonusEmbutido = pontosCapitaoBase * 0.5;
+                const ptsReaisComDecimais = pontosTotaisAPI - bonusEmbutido;
+                normal = Math.trunc(ptsReaisComDecimais);
+                capitao = Math.trunc(pontosCapitaoBase);
+            } else {
+                const idLuxoAuto = dados.reserva_luxo_id || 0;
+                const resultado = processarSubstituicoes(
+                    dados, mapPontuados, timeName, clubesJaJogaram, idLuxoAuto, isAoVivo
+                );
+                normal = resultado.normal;
+                capitao = resultado.capitao;
             }
-        });
 
-        await Promise.all(promises);
-        console.log('\nDados processados com sucesso.');
+            if (!isAoVivo) {
+                safList.push({
+                    nome: timeName,
+                    escudo: TEAM_CONFIG[timeName]?.escudo,
+                    patrimonio: dados.patrimonio || 0
+                });
+            }
 
-        return {
-            scores: scoreMap,
-            rodadaSincronizada: rodadaAlvo,
-            rodada_atual,
-            isAoVivo,
-            mercado_aberto: !isAoVivo,
-            safList
-        };
-    } catch (e) {
-        console.log(`Falha ao buscar Cartola: ${e.message}`);
-        return {
-            scores: {},
-            rodadaSincronizada: null,
-            rodada_atual: null,
-            isAoVivo: false,
-            mercado_aberto: true,
-            safList: []
-        };
-    }
+            scoreMap[normalize(timeName)] = { normal, capitao };
+        } catch (e) {
+            console.log(`Erro ao ler time ${timeName}: ${e.message}`);
+        }
+    });
+
+    await Promise.all(promises);
+    console.log(`\nRodada ${rodadaAlvo} processada (${Object.keys(scoreMap).length} times).`);
+    return { scores: scoreMap, safList };
 }
 
 function applyScores(calendario, scores, rodadaSincronizada, rodadaAtual) {
@@ -474,35 +460,88 @@ function buildEstatisticas(tabela, safList) {
 
 /**
  * Sync Cartola -> calendario_2026.json and return snapshot payloads for static hosting.
+ * Auto-cura: resgata TODAS as rodadas passadas com placar 0-0 no mesmo job
+ * (antes só fazia 1 por sync — por isso o site ficou preso na rodada 8).
  */
 async function runSync() {
     let calendario = loadCalendario();
-    const fetched = await fetchCartolaData(calendario);
-
     let syncOk = false;
     let houveMudanca = false;
+    let safList = [];
+    let status = null;
 
-    if (fetched.rodadaSincronizada) {
-        const applied = applyScores(
-            calendario,
-            fetched.scores,
-            fetched.rodadaSincronizada,
-            fetched.rodada_atual
-        );
-        calendario = applied.calendario;
-        houveMudanca = applied.houveMudanca;
-        if (houveMudanca) {
-            saveCalendario(calendario);
-            console.log(`Snapshot salvo: Rodada ${fetched.rodadaSincronizada}`);
-        }
-        syncOk = true;
-    } else {
+    try {
+        status = await fetchMercadoStatus();
+    } catch (e) {
+        console.log(`Falha ao buscar status Cartola: ${e.message}`);
         console.log('Usando snapshot local (Cartola indisponivel).');
+        const rodadaLimite = inferRodadaLimite(calendario);
+        const tabela = calculateStandings(calendario, rodadaLimite);
+        const estatisticas = buildEstatisticas(tabela, []);
+        return {
+            calendario: enrichCalendario(calendario),
+            classificacao: tabela,
+            estatisticas,
+            meta: {
+                lastSyncAt: new Date().toISOString(),
+                lastUpdate: estatisticas.lastUpdate,
+                rodada: rodadaLimite,
+                live: false,
+                mercado_aberto: true,
+                syncOk: false,
+                houveMudanca: false
+            }
+        };
     }
 
-    const rodadaLimite = fetched.rodada_atual || inferRodadaLimite(calendario);
+    const { rodada_atual, isAoVivo, mercado_aberto, rodadaAlvoPadrao } = status;
+    const pendentes = listRodadasPendentes(calendario, rodada_atual);
+
+    if (pendentes.length) {
+        console.log(`AUTO-CURA: ${pendentes.length} rodada(s) pendente(s): ${pendentes.join(', ')}`);
+    }
+
+    // 1) Backfill consolidado de todas as rodadas atrasadas
+    for (const r of pendentes) {
+        try {
+            console.log(`AUTO-CURA: Resgatando Rodada ${r}`);
+            const { scores, safList: saf } = await fetchScoresForRodada(r, false);
+            if (saf?.length) safList = saf;
+            const applied = applyScores(calendario, scores, r, rodada_atual);
+            calendario = applied.calendario;
+            if (applied.houveMudanca) {
+                houveMudanca = true;
+                console.log(`Snapshot parcial: Rodada ${r}`);
+            }
+            syncOk = true;
+            await new Promise(resolve => setTimeout(resolve, 400));
+        } catch (e) {
+            console.log(`Falha ao resgatar Rodada ${r}: ${e.message}`);
+        }
+    }
+
+    // 2) Sync da rodada alvo atual (19 consolidada / 20 ao vivo), se ainda nao foi no backfill
+    if (!pendentes.includes(rodadaAlvoPadrao)) {
+        try {
+            const { scores, safList: saf } = await fetchScoresForRodada(rodadaAlvoPadrao, isAoVivo);
+            if (saf?.length) safList = saf;
+            const applied = applyScores(calendario, scores, rodadaAlvoPadrao, rodada_atual);
+            calendario = applied.calendario;
+            if (applied.houveMudanca) houveMudanca = true;
+            syncOk = true;
+        } catch (e) {
+            console.log(`Falha no sync da rodada ${rodadaAlvoPadrao}: ${e.message}`);
+        }
+    }
+
+    if (houveMudanca) {
+        saveCalendario(calendario);
+        console.log('calendario_2026.json atualizado.');
+    }
+
+    const rodadaLimite = rodada_atual || inferRodadaLimite(calendario);
     const tabela = calculateStandings(calendario, rodadaLimite);
-    const estatisticas = buildEstatisticas(tabela, fetched.safList || []);
+    const estatisticas = buildEstatisticas(tabela, safList);
     const nowIso = new Date().toISOString();
 
     return {
@@ -513,10 +552,11 @@ async function runSync() {
             lastSyncAt: nowIso,
             lastUpdate: estatisticas.lastUpdate,
             rodada: rodadaLimite,
-            live: !!fetched.isAoVivo,
-            mercado_aberto: fetched.mercado_aberto !== false,
+            live: !!isAoVivo,
+            mercado_aberto: mercado_aberto !== false,
             syncOk,
-            houveMudanca
+            houveMudanca,
+            backfill: pendentes
         }
     };
 }
