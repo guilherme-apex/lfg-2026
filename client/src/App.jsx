@@ -1,78 +1,85 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Table from './components/Table';
 import Matches from './components/Matches';
 import Stats from './components/Stats';
 
-// LINK DA API (Inteligente: Local ou Prod)
-const API_URL = import.meta.env.PROD 
-  ? 'https://lfg-2026.onrender.com' 
-  : 'http://localhost:3001';
+// Producao: JSON estatico na Vercel. Dev: API local opcional (server/).
+const DATA_BASE = import.meta.env.PROD
+  ? '/data'
+  : (import.meta.env.VITE_API_URL || 'http://localhost:3001/api');
+
+const isStatic = import.meta.env.PROD;
+
+function dataUrl(name) {
+  if (isStatic) return `${DATA_BASE}/${name}.json`;
+  return `${DATA_BASE}/${name}`;
+}
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('tabela');
-   
-  // Dados
+
   const [classificacao, setClassificacao] = useState([]);
   const [calendario, setCalendario] = useState({});
   const [stats, setStats] = useState(null);
-  
-  // Estado para guardar a hora da última atualização
-  const [lastUpdate, setLastUpdate] = useState("...");
+  const [lastUpdate, setLastUpdate] = useState('...');
+  const [live, setLive] = useState(false);
 
-  // Estados
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Função de Busca de Dados
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      // O SEGREDO DO SUCESSO: Timestamp (?t=...)
-      // Isso obriga o navegador a baixar os dados novos AGORA.
-      const timestamp = new Date().getTime();
-      
-      console.log(`🏀 Atualizando dados... (Carimbo: ${timestamp})`);
+      const timestamp = Date.now();
+      const opts = { cache: 'no-store' };
 
-      const [resClass, resCal, resStats] = await Promise.all([
-        fetch(`${API_URL}/api/classificacao?t=${timestamp}`),
-        fetch(`${API_URL}/api/calendario?t=${timestamp}`),
-        fetch(`${API_URL}/api/estatisticas?t=${timestamp}`)
+      const [resClass, resCal, resStats, resMeta] = await Promise.all([
+        fetch(`${dataUrl('classificacao')}?t=${timestamp}`, opts),
+        fetch(`${dataUrl('calendario')}?t=${timestamp}`, opts),
+        fetch(`${dataUrl('estatisticas')}?t=${timestamp}`, opts),
+        fetch(`${dataUrl('meta')}?t=${timestamp}`, opts).catch(() => null)
       ]);
+
+      if (!resClass.ok || !resCal.ok || !resStats.ok) {
+        throw new Error('Falha ao carregar dados da liga');
+      }
 
       const dataClass = await resClass.json();
       const dataCal = await resCal.json();
       const dataStats = await resStats.json();
+      const dataMeta = resMeta && resMeta.ok ? await resMeta.json() : null;
 
       setClassificacao(dataClass);
       setCalendario(dataCal);
       setStats(dataStats);
-      
-      // Captura o timestamp vindo da API Stats
-      if (dataStats.lastUpdate) {
-          setLastUpdate(dataStats.lastUpdate);
+
+      if (dataMeta?.lastUpdate) {
+        setLastUpdate(dataMeta.lastUpdate);
+      } else if (dataStats.lastUpdate) {
+        setLastUpdate(dataStats.lastUpdate);
       }
 
-      setLoading(false);
+      if (typeof dataMeta?.live === 'boolean') {
+        setLive(dataMeta.live);
+      }
 
+      setError(null);
+      setLoading(false);
     } catch (err) {
-      console.error("❌ ERRO NA BUSCA:", err);
+      console.error('ERRO NA BUSCA:', err);
       setError(err.message);
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    // 1. Busca imediata ao carregar a página
-    fetchData();
-
-    // 2. AUTO-REFRESH: Atualiza sozinho a cada 30 segundos (Placar de Aeroporto)
-    const intervalo = setInterval(fetchData, 30000);
-
-    // Limpeza ao fechar a aba
-    return () => clearInterval(intervalo);
   }, []);
 
-  // --- LOADING ---
+  useEffect(() => {
+    fetchData();
+    // Estatico: ~5 min (Actions). Dev/local: 30s.
+    const ms = isStatic ? (live ? 60_000 : 120_000) : 30_000;
+    const intervalo = setInterval(fetchData, ms);
+    return () => clearInterval(intervalo);
+  }, [fetchData, live]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-dark-bg text-white flex flex-col items-center justify-center p-4">
@@ -82,40 +89,33 @@ export default function App() {
     );
   }
 
-  // --- ERRO ---
-  if (error) {
+  if (error && !classificacao.length) {
     return (
       <div className="min-h-screen bg-dark-bg text-white flex flex-col items-center justify-center p-4 text-center">
         <h2 className="text-xl font-bold text-red-400 mb-2">Erro de Conexão</h2>
         <p className="text-gray-300 mb-4">{error}</p>
-        <button onClick={() => window.location.reload()} className="px-6 py-2 bg-gray-700 rounded">Tentar Novamente</button>
+        <button onClick={() => { setLoading(true); fetchData(); }} className="px-6 py-2 bg-gray-700 rounded">Tentar Novamente</button>
       </div>
     );
   }
 
-  // --- APP PRINCIPAL ---
   return (
     <div className="min-h-screen bg-dark-bg text-gray-100 font-sans pb-12 flex flex-col">
-      
-      {/* 1. HEADER + TIMESTAMP */}
+
       <div className="w-full relative">
         <Header />
-        {/* Timestamp Posicionado Absolutamente no Topo/Direita (Responsivo) */}
         <div className="absolute top-2 right-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full z-20">
-            <div className="w-1.5 h-1.5 bg-lfg-green rounded-full animate-pulse"></div>
+            <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${live ? 'bg-lfg-green' : 'bg-gray-400'}`}></div>
             <span className="text-[10px] text-gray-300 font-mono tracking-tight">
                 Atualizado às {lastUpdate}h
             </span>
         </div>
       </div>
 
-      {/* 2. CONTEÚDO */}
       <main className="flex-grow w-full max-w-4xl mx-auto px-4 py-6">
-        
-        {/* Container dos Cards */}
+
         <div className="bg-card-bg rounded-xl shadow-lg border border-white/5 overflow-hidden w-full flex flex-col">
-          
-          {/* Navegação de Abas */}
+
           <div className="flex w-full border-b border-white/10 shrink-0">
             <button
               onClick={() => setActiveTab('tabela')}
@@ -143,18 +143,15 @@ export default function App() {
             </button>
           </div>
 
-          {/* Área de Conteúdo */}
-          <div className="p-0 w-full bg-card-bg"> 
-            
+          <div className="p-0 w-full bg-card-bg">
+
             {activeTab === 'tabela' && (
-              // ADIÇÃO: overflow-x-auto para a tabela grande não quebrar no mobile
               <div className="p-4 md:p-6 w-full overflow-x-auto">
                  <Table data={classificacao} />
               </div>
             )}
 
             {activeTab === 'confrontos' && (
-              // ADIÇÃO: Classe 'mobile-card-view-container' para ativar o CSS dos cards
               <div className="p-4 md:p-6 mobile-card-view-container">
                  <Matches data={calendario || {}} />
               </div>
