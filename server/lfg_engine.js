@@ -308,7 +308,15 @@ function applyScores(calendario, scores, rodadaSincronizada, rodadaAtual) {
         const vis = scores[normalize(jogo.visitante)];
 
         if (casa && vis) {
-            if (isRodadaPassada && (jogo.placar_casa > 0 || jogo.placar_visitante > 0)) {
+            // Trava só rodadas antigas já consolidadas (r < rodadaAtual-1).
+            // A rodada recém-fechada (rodadaAtual-1) SEMPRE pode ser sobrescrita:
+            // ela pode ter ficado com parcial AO VIVO e precisa do placar final
+            // consolidado (sem bônus de capitão), igual às demais.
+            if (
+                isRodadaPassada &&
+                rodadaSincronizada < (rodadaAtual - 1) &&
+                (jogo.placar_casa > 0 || jogo.placar_visitante > 0)
+            ) {
                 return jogo;
             }
 

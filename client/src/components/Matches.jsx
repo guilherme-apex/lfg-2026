@@ -1,19 +1,34 @@
 import React, { useState, useEffect } from 'react';
 
+function pickLatestRodada(rodadas, data) {
+  if (!rodadas.length) return "Rodada 1";
+  // Preferência: última rodada com algum placar > 0; senão, a mais recente do calendário
+  for (let i = rodadas.length - 1; i >= 0; i--) {
+    const jogos = data?.[rodadas[i]] || [];
+    if (jogos.some(j => (j.placar_casa || 0) > 0 || (j.placar_visitante || 0) > 0)) {
+      return rodadas[i];
+    }
+  }
+  return rodadas[rodadas.length - 1];
+}
+
 export default function Matches({ data }) {
   // Ordena as rodadas numericamente
   const rodadas = data ? Object.keys(data).sort((a, b) => {
       return parseInt(a.replace(/\D/g, '')) - parseInt(b.replace(/\D/g, ''));
   }) : [];
 
-  const [selectedRodada, setSelectedRodada] = useState(rodadas[0] || "Rodada 1");
+  const [selectedRodada, setSelectedRodada] = useState(() => pickLatestRodada(rodadas, data));
+  const [initialized, setInitialized] = useState(false);
 
-  // Garante que a rodada selecionada existe
+  // Ao carregar/atualizar dados: abre na rodada mais recente com resultado
   useEffect(() => {
-    if (rodadas.length > 0 && !rodadas.includes(selectedRodada)) {
-        setSelectedRodada(rodadas[0]);
+    if (!rodadas.length) return;
+    if (!initialized || !rodadas.includes(selectedRodada)) {
+      setSelectedRodada(pickLatestRodada(rodadas, data));
+      setInitialized(true);
     }
-  }, [data, rodadas, selectedRodada]);
+  }, [data, rodadas, selectedRodada, initialized]);
 
   if (!data) return null;
   
