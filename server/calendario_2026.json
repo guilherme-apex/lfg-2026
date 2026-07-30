@@ -1651,10 +1651,10 @@
         {
             "casa": "ursinho pó ffc",
             "visitante": "Wakanda_sport_club",
-            "placar_casa": 66,
-            "placar_visitante": 49,
-            "placar_casa_capitao": 66,
-            "placar_visitante_capitao": 49
+            "placar_casa": 70,
+            "placar_visitante": 53,
+            "placar_casa_capitao": 70,
+            "placar_visitante_capitao": 53
         },
         {
             "casa": "BOTTONS CASCAVEL",
@@ -1707,17 +1707,17 @@
         {
             "casa": "CL11 FC",
             "visitante": "Realdonatello",
-            "placar_casa": 38,
-            "placar_visitante": 58,
-            "placar_casa_capitao": 39,
-            "placar_visitante_capitao": 58
+            "placar_casa": 45,
+            "placar_visitante": 69,
+            "placar_casa_capitao": 46,
+            "placar_visitante_capitao": 69
         },
         {
             "casa": "Coringudo da Zn",
             "visitante": "ArroganTRI/PR",
-            "placar_casa": 5,
+            "placar_casa": 22,
             "placar_visitante": 28,
-            "placar_casa_capitao": 5,
+            "placar_casa_capitao": 22,
             "placar_visitante_capitao": 29
         }
     ],
