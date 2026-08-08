@@ -1757,10 +1757,10 @@
         {
             "casa": "Ronaldito",
             "visitante": "jakte FC",
-            "placar_casa": 2,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 2,
-            "placar_visitante_capitao": 0
+            "placar_casa": 8,
+            "placar_visitante": 7,
+            "placar_casa_capitao": 8,
+            "placar_visitante_capitao": 7
         },
         {
             "casa": "S.C Milagroso",
@@ -1797,9 +1797,9 @@
         {
             "casa": "Coringudo da Zn",
             "visitante": "CL11 FC",
-            "placar_casa": 10,
+            "placar_casa": 4,
             "placar_visitante": 0,
-            "placar_casa_capitao": 10,
+            "placar_casa_capitao": 4,
             "placar_visitante_capitao": 0
         }
     ],
