@@ -1749,17 +1749,17 @@
         {
             "casa": "Everbary",
             "visitante": "BOTTONS CASCAVEL",
-            "placar_casa": 40,
-            "placar_visitante": 41,
-            "placar_casa_capitao": 43,
-            "placar_visitante_capitao": 41
+            "placar_casa": 41,
+            "placar_visitante": 55,
+            "placar_casa_capitao": 44,
+            "placar_visitante_capitao": 55
         },
         {
             "casa": "Ronaldito",
             "visitante": "jakte FC",
-            "placar_casa": 50,
+            "placar_casa": 45,
             "placar_visitante": 49,
-            "placar_casa_capitao": 55,
+            "placar_casa_capitao": 50,
             "placar_visitante_capitao": 52
         },
         {
@@ -1773,9 +1773,9 @@
         {
             "casa": "S.E. BURROW LSU",
             "visitante": "Pepethinaikos",
-            "placar_casa": 36,
+            "placar_casa": 38,
             "placar_visitante": 39,
-            "placar_casa_capitao": 36,
+            "placar_casa_capitao": 39,
             "placar_visitante_capitao": 43
         },
         {
@@ -1789,17 +1789,17 @@
         {
             "casa": "ArroganTRI/PR",
             "visitante": "total 12 Fc",
-            "placar_casa": 20,
+            "placar_casa": 27,
             "placar_visitante": 46,
-            "placar_casa_capitao": 20,
+            "placar_casa_capitao": 27,
             "placar_visitante_capitao": 51
         },
         {
             "casa": "Coringudo da Zn",
             "visitante": "CL11 FC",
-            "placar_casa": 14,
+            "placar_casa": 32,
             "placar_visitante": 45,
-            "placar_casa_capitao": 14,
+            "placar_casa_capitao": 32,
             "placar_visitante_capitao": 47
         }
     ],
