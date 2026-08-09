@@ -1725,26 +1725,26 @@
         {
             "casa": "Wakanda_sport_club",
             "visitante": "Decc F.C",
-            "placar_casa": 3,
-            "placar_visitante": 17,
-            "placar_casa_capitao": 3,
-            "placar_visitante_capitao": 18
+            "placar_casa": 12,
+            "placar_visitante": 18,
+            "placar_casa_capitao": 12,
+            "placar_visitante_capitao": 19
         },
         {
             "casa": "C.E. Olhodaguense",
             "visitante": "Caximbobol FC",
-            "placar_casa": 3,
+            "placar_casa": 13,
             "placar_visitante": 7,
-            "placar_casa_capitao": 3,
+            "placar_casa_capitao": 13,
             "placar_visitante_capitao": 7
         },
         {
             "casa": "OPPURETTO FC10",
             "visitante": "ursinho pó ffc",
-            "placar_casa": 4,
-            "placar_visitante": 2,
-            "placar_casa_capitao": 4,
-            "placar_visitante_capitao": 2
+            "placar_casa": 12,
+            "placar_visitante": 16,
+            "placar_casa_capitao": 12,
+            "placar_visitante_capitao": 16
         },
         {
             "casa": "Everbary",
@@ -1757,10 +1757,10 @@
         {
             "casa": "Ronaldito",
             "visitante": "jakte FC",
-            "placar_casa": 15,
-            "placar_visitante": 21,
-            "placar_casa_capitao": 15,
-            "placar_visitante_capitao": 21
+            "placar_casa": 23,
+            "placar_visitante": 29,
+            "placar_casa_capitao": 23,
+            "placar_visitante_capitao": 29
         },
         {
             "casa": "S.C Milagroso",
@@ -1773,17 +1773,17 @@
         {
             "casa": "S.E. BURROW LSU",
             "visitante": "Pepethinaikos",
-            "placar_casa": 2,
-            "placar_visitante": 3,
-            "placar_casa_capitao": 2,
-            "placar_visitante_capitao": 3
+            "placar_casa": 15,
+            "placar_visitante": 11,
+            "placar_casa_capitao": 15,
+            "placar_visitante_capitao": 11
         },
         {
             "casa": "Realdonatello",
             "visitante": "Estreia  da Manhã",
-            "placar_casa": 2,
+            "placar_casa": 10,
             "placar_visitante": 10,
-            "placar_casa_capitao": 2,
+            "placar_casa_capitao": 10,
             "placar_visitante_capitao": 10
         },
         {
