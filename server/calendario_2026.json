@@ -1725,18 +1725,18 @@
         {
             "casa": "Wakanda_sport_club",
             "visitante": "Decc F.C",
-            "placar_casa": 7,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 7,
-            "placar_visitante_capitao": 0
+            "placar_casa": 1,
+            "placar_visitante": 13,
+            "placar_casa_capitao": 1,
+            "placar_visitante_capitao": 14
         },
         {
             "casa": "C.E. Olhodaguense",
             "visitante": "Caximbobol FC",
-            "placar_casa": 7,
-            "placar_visitante": 9,
-            "placar_casa_capitao": 7,
-            "placar_visitante_capitao": 9
+            "placar_casa": 1,
+            "placar_visitante": 7,
+            "placar_casa_capitao": 1,
+            "placar_visitante_capitao": 7
         },
         {
             "casa": "OPPURETTO FC10",
@@ -1749,18 +1749,18 @@
         {
             "casa": "Everbary",
             "visitante": "BOTTONS CASCAVEL",
-            "placar_casa": 2,
-            "placar_visitante": 7,
-            "placar_casa_capitao": 4,
-            "placar_visitante_capitao": 7
+            "placar_casa": 6,
+            "placar_visitante": 2,
+            "placar_casa_capitao": 9,
+            "placar_visitante_capitao": 2
         },
         {
             "casa": "Ronaldito",
             "visitante": "jakte FC",
-            "placar_casa": 11,
-            "placar_visitante": 15,
-            "placar_casa_capitao": 11,
-            "placar_visitante_capitao": 15
+            "placar_casa": 13,
+            "placar_visitante": 19,
+            "placar_casa_capitao": 13,
+            "placar_visitante_capitao": 19
         },
         {
             "casa": "S.C Milagroso",
@@ -1789,18 +1789,18 @@
         {
             "casa": "ArroganTRI/PR",
             "visitante": "total 12 Fc",
-            "placar_casa": 8,
-            "placar_visitante": 9,
-            "placar_casa_capitao": 8,
-            "placar_visitante_capitao": 9
+            "placar_casa": 3,
+            "placar_visitante": 7,
+            "placar_casa_capitao": 3,
+            "placar_visitante_capitao": 7
         },
         {
             "casa": "Coringudo da Zn",
             "visitante": "CL11 FC",
-            "placar_casa": 2,
-            "placar_visitante": 7,
-            "placar_casa_capitao": 2,
-            "placar_visitante_capitao": 7
+            "placar_casa": 3,
+            "placar_visitante": 4,
+            "placar_casa_capitao": 3,
+            "placar_visitante_capitao": 6
         }
     ],
     "Rodada 23": [
