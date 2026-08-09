@@ -1725,17 +1725,17 @@
         {
             "casa": "Wakanda_sport_club",
             "visitante": "Decc F.C",
-            "placar_casa": 33,
-            "placar_visitante": 23,
-            "placar_casa_capitao": 37,
-            "placar_visitante_capitao": 24
+            "placar_casa": 34,
+            "placar_visitante": 26,
+            "placar_casa_capitao": 39,
+            "placar_visitante_capitao": 27
         },
         {
             "casa": "C.E. Olhodaguense",
             "visitante": "Caximbobol FC",
             "placar_casa": 42,
             "placar_visitante": 27,
-            "placar_casa_capitao": 46,
+            "placar_casa_capitao": 47,
             "placar_visitante_capitao": 27
         },
         {
@@ -1757,26 +1757,26 @@
         {
             "casa": "Ronaldito",
             "visitante": "jakte FC",
-            "placar_casa": 48,
-            "placar_visitante": 44,
-            "placar_casa_capitao": 52,
-            "placar_visitante_capitao": 47
+            "placar_casa": 50,
+            "placar_visitante": 47,
+            "placar_casa_capitao": 54,
+            "placar_visitante_capitao": 50
         },
         {
             "casa": "S.C Milagroso",
             "visitante": "LUIGIONEL MESSI",
-            "placar_casa": 30,
+            "placar_casa": 32,
             "placar_visitante": 39,
-            "placar_casa_capitao": 30,
+            "placar_casa_capitao": 32,
             "placar_visitante_capitao": 41
         },
         {
             "casa": "S.E. BURROW LSU",
             "visitante": "Pepethinaikos",
-            "placar_casa": 34,
-            "placar_visitante": 36,
-            "placar_casa_capitao": 34,
-            "placar_visitante_capitao": 40
+            "placar_casa": 35,
+            "placar_visitante": 37,
+            "placar_casa_capitao": 35,
+            "placar_visitante_capitao": 41
         },
         {
             "casa": "Realdonatello",
@@ -1797,10 +1797,10 @@
         {
             "casa": "Coringudo da Zn",
             "visitante": "CL11 FC",
-            "placar_casa": 3,
-            "placar_visitante": 4,
-            "placar_casa_capitao": 3,
-            "placar_visitante_capitao": 6
+            "placar_casa": 4,
+            "placar_visitante": 45,
+            "placar_casa_capitao": 4,
+            "placar_visitante_capitao": 47
         }
     ],
     "Rodada 23": [
