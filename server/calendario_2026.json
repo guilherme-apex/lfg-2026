@@ -1725,10 +1725,10 @@
         {
             "casa": "Wakanda_sport_club",
             "visitante": "Decc F.C",
-            "placar_casa": 1,
-            "placar_visitante": 13,
-            "placar_casa_capitao": 1,
-            "placar_visitante_capitao": 14
+            "placar_casa": 9,
+            "placar_visitante": 15,
+            "placar_casa_capitao": 9,
+            "placar_visitante_capitao": 16
         },
         {
             "casa": "C.E. Olhodaguense",
@@ -1741,17 +1741,17 @@
         {
             "casa": "OPPURETTO FC10",
             "visitante": "ursinho pó ffc",
-            "placar_casa": 0,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 0,
-            "placar_visitante_capitao": 0
+            "placar_casa": 1,
+            "placar_visitante": 6,
+            "placar_casa_capitao": 1,
+            "placar_visitante_capitao": 6
         },
         {
             "casa": "Everbary",
             "visitante": "BOTTONS CASCAVEL",
             "placar_casa": 6,
             "placar_visitante": 2,
-            "placar_casa_capitao": 9,
+            "placar_casa_capitao": 6,
             "placar_visitante_capitao": 2
         },
         {
