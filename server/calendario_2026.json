@@ -1823,9 +1823,9 @@
         {
             "casa": "Caximbobol FC",
             "visitante": "Everbary",
-            "placar_casa": 16,
+            "placar_casa": 15,
             "placar_visitante": 17,
-            "placar_casa_capitao": 16,
+            "placar_casa_capitao": 15,
             "placar_visitante_capitao": 17
         },
         {
@@ -1871,18 +1871,18 @@
         {
             "casa": "Estreia  da Manhã",
             "visitante": "Coringudo da Zn",
-            "placar_casa": 10,
+            "placar_casa": 9,
             "placar_visitante": 10,
-            "placar_casa_capitao": 13,
+            "placar_casa_capitao": 12,
             "placar_visitante_capitao": 12
         },
         {
             "casa": "total 12 Fc",
             "visitante": "CL11 FC",
-            "placar_casa": 18,
-            "placar_visitante": 15,
-            "placar_casa_capitao": 21,
-            "placar_visitante_capitao": 18
+            "placar_casa": 17,
+            "placar_visitante": 14,
+            "placar_casa_capitao": 20,
+            "placar_visitante_capitao": 17
         }
     ],
     "Rodada 24": [
