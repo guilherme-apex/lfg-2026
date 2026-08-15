@@ -1807,9 +1807,9 @@
         {
             "casa": "Decc F.C",
             "visitante": "C.E. Olhodaguense",
-            "placar_casa": 0,
+            "placar_casa": 1,
             "placar_visitante": 0,
-            "placar_casa_capitao": 0,
+            "placar_casa_capitao": 1,
             "placar_visitante_capitao": 0
         },
         {
