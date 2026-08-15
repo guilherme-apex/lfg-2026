@@ -1807,9 +1807,9 @@
         {
             "casa": "Decc F.C",
             "visitante": "C.E. Olhodaguense",
-            "placar_casa": 28,
+            "placar_casa": 27,
             "placar_visitante": 0,
-            "placar_casa_capitao": 30,
+            "placar_casa_capitao": 32,
             "placar_visitante_capitao": 0
         },
         {
@@ -1839,9 +1839,9 @@
         {
             "casa": "BOTTONS CASCAVEL",
             "visitante": "S.C Milagroso",
-            "placar_casa": 17,
+            "placar_casa": 5,
             "placar_visitante": 0,
-            "placar_casa_capitao": 17,
+            "placar_casa_capitao": 5,
             "placar_visitante_capitao": 0
         },
         {
@@ -1879,9 +1879,9 @@
         {
             "casa": "total 12 Fc",
             "visitante": "CL11 FC",
-            "placar_casa": 7,
+            "placar_casa": 2,
             "placar_visitante": 0,
-            "placar_casa_capitao": 7,
+            "placar_casa_capitao": 2,
             "placar_visitante_capitao": 0
         }
     ],
