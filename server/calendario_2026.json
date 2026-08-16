@@ -1815,9 +1815,9 @@
         {
             "casa": "Wakanda_sport_club",
             "visitante": "OPPURETTO FC10",
-            "placar_casa": 31,
+            "placar_casa": 26,
             "placar_visitante": 24,
-            "placar_casa_capitao": 34,
+            "placar_casa_capitao": 29,
             "placar_visitante_capitao": 26
         },
         {
@@ -1839,10 +1839,10 @@
         {
             "casa": "BOTTONS CASCAVEL",
             "visitante": "S.C Milagroso",
-            "placar_casa": 33,
-            "placar_visitante": 20,
-            "placar_casa_capitao": 36,
-            "placar_visitante_capitao": 23
+            "placar_casa": 29,
+            "placar_visitante": 10,
+            "placar_casa_capitao": 32,
+            "placar_visitante_capitao": 13
         },
         {
             "casa": "jakte FC",
@@ -1871,9 +1871,9 @@
         {
             "casa": "Estreia  da Manhã",
             "visitante": "Coringudo da Zn",
-            "placar_casa": 20,
+            "placar_casa": 16,
             "placar_visitante": 11,
-            "placar_casa_capitao": 23,
+            "placar_casa_capitao": 19,
             "placar_visitante_capitao": 13
         },
         {
