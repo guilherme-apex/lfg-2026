@@ -1807,9 +1807,9 @@
         {
             "casa": "Decc F.C",
             "visitante": "C. E. Olhodaguense",
-            "placar_casa": 48,
+            "placar_casa": 53,
             "placar_visitante": 53,
-            "placar_casa_capitao": 52,
+            "placar_casa_capitao": 57,
             "placar_visitante_capitao": 56
         },
         {
@@ -1823,18 +1823,18 @@
         {
             "casa": "caximbobol FC",
             "visitante": "Everbary",
-            "placar_casa": 47,
-            "placar_visitante": 92,
-            "placar_casa_capitao": 48,
+            "placar_casa": 48,
+            "placar_visitante": 87,
+            "placar_casa_capitao": 49,
             "placar_visitante_capitao": 92
         },
         {
             "casa": "Data CFC",
             "visitante": "Ronaldito FC",
-            "placar_casa": 42,
-            "placar_visitante": 46,
-            "placar_casa_capitao": 45,
-            "placar_visitante_capitao": 49
+            "placar_casa": 43,
+            "placar_visitante": 56,
+            "placar_casa_capitao": 46,
+            "placar_visitante_capitao": 59
         },
         {
             "casa": "BOTTONS CASCAVEL",
@@ -1847,25 +1847,25 @@
         {
             "casa": "JAKTE FC",
             "visitante": "S.E. BURROW LSU",
-            "placar_casa": 34,
+            "placar_casa": 44,
             "placar_visitante": 30,
-            "placar_casa_capitao": 34,
+            "placar_casa_capitao": 44,
             "placar_visitante_capitao": 30
         },
         {
             "casa": "LUIGIONEL MESSI",
             "visitante": "Realdonatello",
-            "placar_casa": 30,
-            "placar_visitante": 55,
-            "placar_casa_capitao": 30,
-            "placar_visitante_capitao": 58
+            "placar_casa": 31,
+            "placar_visitante": 51,
+            "placar_casa_capitao": 31,
+            "placar_visitante_capitao": 54
         },
         {
             "casa": "Pepethinaikos AC",
             "visitante": "ArroganTRI/PR",
-            "placar_casa": 41,
+            "placar_casa": 50,
             "placar_visitante": 65,
-            "placar_casa_capitao": 41,
+            "placar_casa_capitao": 50,
             "placar_visitante_capitao": 69
         },
         {
