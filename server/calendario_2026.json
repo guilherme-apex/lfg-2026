@@ -1815,10 +1815,10 @@
         {
             "casa": "Wakanda_sport_club",
             "visitante": "OPPURETTO FC10",
-            "placar_casa": 56,
-            "placar_visitante": 33,
-            "placar_casa_capitao": 59,
-            "placar_visitante_capitao": 35
+            "placar_casa": 58,
+            "placar_visitante": 48,
+            "placar_casa_capitao": 61,
+            "placar_visitante_capitao": 50
         },
         {
             "casa": "caximbobol FC",
@@ -1831,25 +1831,25 @@
         {
             "casa": "Data CFC",
             "visitante": "Ronaldito FC",
-            "placar_casa": 43,
+            "placar_casa": 45,
             "placar_visitante": 56,
-            "placar_casa_capitao": 46,
+            "placar_casa_capitao": 48,
             "placar_visitante_capitao": 59
         },
         {
             "casa": "BOTTONS CASCAVEL",
             "visitante": "S.C Milagroso",
-            "placar_casa": 55,
-            "placar_visitante": 41,
-            "placar_casa_capitao": 58,
-            "placar_visitante_capitao": 44
+            "placar_casa": 57,
+            "placar_visitante": 53,
+            "placar_casa_capitao": 60,
+            "placar_visitante_capitao": 56
         },
         {
             "casa": "JAKTE FC",
             "visitante": "S.E. BURROW LSU",
-            "placar_casa": 44,
+            "placar_casa": 46,
             "placar_visitante": 30,
-            "placar_casa_capitao": 44,
+            "placar_casa_capitao": 46,
             "placar_visitante_capitao": 30
         },
         {
@@ -1863,26 +1863,26 @@
         {
             "casa": "Pepethinaikos AC",
             "visitante": "ArroganTRI/PR",
-            "placar_casa": 50,
+            "placar_casa": 52,
             "placar_visitante": 65,
-            "placar_casa_capitao": 50,
+            "placar_casa_capitao": 52,
             "placar_visitante_capitao": 69
         },
         {
             "casa": "Estreia da Manhã Fc",
             "visitante": "Coringudo da Zn",
-            "placar_casa": 46,
-            "placar_visitante": 28,
-            "placar_casa_capitao": 49,
-            "placar_visitante_capitao": 30
+            "placar_casa": 48,
+            "placar_visitante": 20,
+            "placar_casa_capitao": 51,
+            "placar_visitante_capitao": 22
         },
         {
             "casa": "Total 12 FC",
             "visitante": "CL11 FC",
-            "placar_casa": 43,
-            "placar_visitante": 47,
-            "placar_casa_capitao": 46,
-            "placar_visitante_capitao": 50
+            "placar_casa": 45,
+            "placar_visitante": 48,
+            "placar_casa_capitao": 48,
+            "placar_visitante_capitao": 51
         }
     ],
     "Rodada 24": [
