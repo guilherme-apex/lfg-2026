@@ -1,10 +1,19 @@
 {
-  "lastSyncAt": "2026-08-16T17:40:50.724Z",
-  "lastUpdate": "14:40",
+  "lastSyncAt": "2026-08-16T17:39:03.560851Z",
+  "lastUpdate": "14:39",
   "rodada": 23,
   "live": true,
   "mercado_aberto": false,
   "syncOk": true,
-  "houveMudanca": false,
-  "backfill": []
+  "houveMudanca": true,
+  "renames": {
+    "ursinho pó ffc": "Data CFC",
+    "C.E. Olhodaguense": "C. E. Olhodaguense",
+    "Pepethinaikos": "Pepethinaikos AC",
+    "jakte FC": "JAKTE FC",
+    "total 12 Fc": "Total 12 FC",
+    "Ronaldito": "Ronaldito FC",
+    "Caximbobol FC": "caximbobol FC",
+    "Estreia  da Manhã": "Estreia da Manhã Fc"
+  }
 }

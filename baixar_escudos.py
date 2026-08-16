@@ -6,24 +6,26 @@ PASTA_DESTINO = "./client/public/shields"
 
 # LISTA ATUALIZADA (19 TIMES)
 TIMES_PARA_BUSCAR = [
-    "ursinho pó ffc",
+    "Data CFC",
     "CL11 FC",
     "Decc F.C",
     "OPPURETTO FC10",
     "C. E. Olhodaguense",
-    "Pepethinaikos",
-    "jakte FC",
+    "Pepethinaikos AC",
+    "JAKTE FC",
     "BOTTONS CASCAVEL",
     "Wakanda_sport_club",
     "S.C Milagroso",
     "S.E. BURROW LSU",
     "LUIGIONEL MESSI",
-    "total 12 Fc",
-    "Ronaldito",
-    "Caximbobol FC",
+    "Total 12 FC",
+    "Ronaldito FC",
+    "caximbobol FC",
     "Everbary",
     "Coringudo da Zn",
-    "Estreia  da Manhã"
+    "Estreia da Manhã Fc",
+    "ArroganTRI/PR",
+    "Realdonatello"
 ]
 
 HEADERS = {
