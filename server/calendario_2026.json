@@ -1831,57 +1831,57 @@
         {
             "casa": "Data CFC",
             "visitante": "Ronaldito FC",
-            "placar_casa": 52,
+            "placar_casa": 65,
             "placar_visitante": 66,
-            "placar_casa_capitao": 55,
+            "placar_casa_capitao": 68,
             "placar_visitante_capitao": 69
         },
         {
             "casa": "BOTTONS CASCAVEL",
             "visitante": "S.C Milagroso",
-            "placar_casa": 62,
-            "placar_visitante": 62,
-            "placar_casa_capitao": 65,
-            "placar_visitante_capitao": 65
+            "placar_casa": 65,
+            "placar_visitante": 67,
+            "placar_casa_capitao": 71,
+            "placar_visitante_capitao": 70
         },
         {
             "casa": "JAKTE FC",
             "visitante": "S.E. BURROW LSU",
-            "placar_casa": 68,
-            "placar_visitante": 35,
-            "placar_casa_capitao": 70,
-            "placar_visitante_capitao": 35
+            "placar_casa": 72,
+            "placar_visitante": 45,
+            "placar_casa_capitao": 74,
+            "placar_visitante_capitao": 46
         },
         {
             "casa": "LUIGIONEL MESSI",
             "visitante": "Realdonatello",
-            "placar_casa": 38,
-            "placar_visitante": 63,
-            "placar_casa_capitao": 38,
-            "placar_visitante_capitao": 66
+            "placar_casa": 51,
+            "placar_visitante": 75,
+            "placar_casa_capitao": 52,
+            "placar_visitante_capitao": 78
         },
         {
             "casa": "Pepethinaikos AC",
             "visitante": "ArroganTRI/PR",
-            "placar_casa": 63,
+            "placar_casa": 71,
             "placar_visitante": 65,
-            "placar_casa_capitao": 65,
+            "placar_casa_capitao": 73,
             "placar_visitante_capitao": 69
         },
         {
             "casa": "Estreia da Manhã Fc",
             "visitante": "Coringudo da Zn",
-            "placar_casa": 55,
+            "placar_casa": 64,
             "placar_visitante": 34,
-            "placar_casa_capitao": 58,
+            "placar_casa_capitao": 67,
             "placar_visitante_capitao": 36
         },
         {
             "casa": "Total 12 FC",
             "visitante": "CL11 FC",
-            "placar_casa": 52,
+            "placar_casa": 55,
             "placar_visitante": 53,
-            "placar_casa_capitao": 55,
+            "placar_casa_capitao": 58,
             "placar_visitante_capitao": 56
         }
     ],
