@@ -1,10 +1,10 @@
 {
-  "lastSyncAt": "2026-08-16T23:47:40.724Z",
-  "lastUpdate": "20:47",
+  "lastSyncAt": "2026-08-17T00:00:32.181Z",
+  "lastUpdate": "21:00",
   "rodada": 23,
   "live": true,
   "mercado_aberto": false,
   "syncOk": true,
-  "houveMudanca": true,
+  "houveMudanca": false,
   "backfill": []
 }
