@@ -1889,18 +1889,18 @@
         {
             "casa": "OPPURETTO FC10",
             "visitante": "Decc F.C",
-            "placar_casa": 0,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 0,
-            "placar_visitante_capitao": 0
+            "placar_casa": 2,
+            "placar_visitante": 5,
+            "placar_casa_capitao": 2,
+            "placar_visitante_capitao": 5
         },
         {
             "casa": "Everbary",
             "visitante": "C. E. Olhodaguense",
-            "placar_casa": 0,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 0,
-            "placar_visitante_capitao": 0
+            "placar_casa": 5,
+            "placar_visitante": 10,
+            "placar_casa_capitao": 5,
+            "placar_visitante_capitao": 10
         },
         {
             "casa": "Ronaldito FC",
@@ -1913,25 +1913,25 @@
         {
             "casa": "S.C Milagroso",
             "visitante": "caximbobol FC",
-            "placar_casa": 0,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 0,
-            "placar_visitante_capitao": 0
+            "placar_casa": 5,
+            "placar_visitante": 5,
+            "placar_casa_capitao": 5,
+            "placar_visitante_capitao": 5
         },
         {
             "casa": "S.E. BURROW LSU",
             "visitante": "Data CFC",
-            "placar_casa": 0,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 0,
-            "placar_visitante_capitao": 0
+            "placar_casa": 10,
+            "placar_visitante": 7,
+            "placar_casa_capitao": 10,
+            "placar_visitante_capitao": 7
         },
         {
             "casa": "Realdonatello",
             "visitante": "BOTTONS CASCAVEL",
-            "placar_casa": 0,
+            "placar_casa": 7,
             "placar_visitante": 0,
-            "placar_casa_capitao": 0,
+            "placar_casa_capitao": 7,
             "placar_visitante_capitao": 0
         },
         {
@@ -1953,18 +1953,18 @@
         {
             "casa": "CL11 FC",
             "visitante": "Pepethinaikos AC",
-            "placar_casa": 0,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 0,
-            "placar_visitante_capitao": 0
+            "placar_casa": 5,
+            "placar_visitante": 12,
+            "placar_casa_capitao": 5,
+            "placar_visitante_capitao": 12
         },
         {
             "casa": "Total 12 FC",
             "visitante": "Estreia da Manhã Fc",
-            "placar_casa": 0,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 0,
-            "placar_visitante_capitao": 0
+            "placar_casa": 5,
+            "placar_visitante": 10,
+            "placar_casa_capitao": 5,
+            "placar_visitante_capitao": 10
         }
     ],
     "Rodada 25": [
