@@ -1889,18 +1889,18 @@
         {
             "casa": "OPPURETTO FC10",
             "visitante": "Decc F.C",
-            "placar_casa": 2,
-            "placar_visitante": 5,
-            "placar_casa_capitao": 2,
-            "placar_visitante_capitao": 5
+            "placar_casa": 6,
+            "placar_visitante": 9,
+            "placar_casa_capitao": 6,
+            "placar_visitante_capitao": 9
         },
         {
             "casa": "Everbary",
             "visitante": "C. E. Olhodaguense",
-            "placar_casa": 5,
-            "placar_visitante": 10,
-            "placar_casa_capitao": 5,
-            "placar_visitante_capitao": 10
+            "placar_casa": 7,
+            "placar_visitante": 13,
+            "placar_casa_capitao": 7,
+            "placar_visitante_capitao": 13
         },
         {
             "casa": "Ronaldito FC",
@@ -1913,26 +1913,26 @@
         {
             "casa": "S.C Milagroso",
             "visitante": "caximbobol FC",
-            "placar_casa": 5,
-            "placar_visitante": 5,
-            "placar_casa_capitao": 5,
-            "placar_visitante_capitao": 5
+            "placar_casa": 6,
+            "placar_visitante": 8,
+            "placar_casa_capitao": 6,
+            "placar_visitante_capitao": 8
         },
         {
             "casa": "S.E. BURROW LSU",
             "visitante": "Data CFC",
-            "placar_casa": 10,
-            "placar_visitante": 7,
-            "placar_casa_capitao": 10,
-            "placar_visitante_capitao": 7
+            "placar_casa": 13,
+            "placar_visitante": 12,
+            "placar_casa_capitao": 13,
+            "placar_visitante_capitao": 13
         },
         {
             "casa": "Realdonatello",
             "visitante": "BOTTONS CASCAVEL",
-            "placar_casa": 7,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 7,
-            "placar_visitante_capitao": 0
+            "placar_casa": 11,
+            "placar_visitante": 3,
+            "placar_casa_capitao": 12,
+            "placar_visitante_capitao": 3
         },
         {
             "casa": "ArroganTRI/PR",
@@ -1945,26 +1945,26 @@
         {
             "casa": "Coringudo da Zn",
             "visitante": "LUIGIONEL MESSI",
-            "placar_casa": 0,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 0,
-            "placar_visitante_capitao": 0
+            "placar_casa": 2,
+            "placar_visitante": 19,
+            "placar_casa_capitao": 3,
+            "placar_visitante_capitao": 20
         },
         {
             "casa": "CL11 FC",
             "visitante": "Pepethinaikos AC",
-            "placar_casa": 5,
-            "placar_visitante": 12,
-            "placar_casa_capitao": 5,
-            "placar_visitante_capitao": 12
+            "placar_casa": 9,
+            "placar_visitante": 17,
+            "placar_casa_capitao": 9,
+            "placar_visitante_capitao": 18
         },
         {
             "casa": "Total 12 FC",
             "visitante": "Estreia da Manhã Fc",
-            "placar_casa": 5,
-            "placar_visitante": 10,
-            "placar_casa_capitao": 5,
-            "placar_visitante_capitao": 10
+            "placar_casa": 9,
+            "placar_visitante": 14,
+            "placar_casa_capitao": 9,
+            "placar_visitante_capitao": 14
         }
     ],
     "Rodada 25": [
