@@ -1889,17 +1889,17 @@
         {
             "casa": "OPPURETTO FC10",
             "visitante": "Decc F.C",
-            "placar_casa": 18,
+            "placar_casa": 20,
             "placar_visitante": 21,
-            "placar_casa_capitao": 18,
+            "placar_casa_capitao": 20,
             "placar_visitante_capitao": 21
         },
         {
             "casa": "Everbary",
             "visitante": "C. E. Olhodaguense",
-            "placar_casa": 9,
+            "placar_casa": 10,
             "placar_visitante": 16,
-            "placar_casa_capitao": 11,
+            "placar_casa_capitao": 12,
             "placar_visitante_capitao": 16
         },
         {
@@ -1929,9 +1929,9 @@
         {
             "casa": "Realdonatello",
             "visitante": "BOTTONS CASCAVEL",
-            "placar_casa": 17,
+            "placar_casa": 19,
             "placar_visitante": 14,
-            "placar_casa_capitao": 24,
+            "placar_casa_capitao": 26,
             "placar_visitante_capitao": 14
         },
         {
