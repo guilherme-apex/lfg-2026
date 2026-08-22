@@ -1897,17 +1897,17 @@
         {
             "casa": "Everbary",
             "visitante": "C. E. Olhodaguense",
-            "placar_casa": 15,
-            "placar_visitante": 22,
-            "placar_casa_capitao": 17,
-            "placar_visitante_capitao": 22
+            "placar_casa": 17,
+            "placar_visitante": 24,
+            "placar_casa_capitao": 19,
+            "placar_visitante_capitao": 24
         },
         {
             "casa": "Ronaldito FC",
             "visitante": "Wakanda_sport_club",
-            "placar_casa": 7,
+            "placar_casa": 10,
             "placar_visitante": 23,
-            "placar_casa_capitao": 7,
+            "placar_casa_capitao": 10,
             "placar_visitante_capitao": 25
         },
         {
@@ -1921,10 +1921,10 @@
         {
             "casa": "S.E. BURROW LSU",
             "visitante": "Data CFC",
-            "placar_casa": 22,
-            "placar_visitante": 32,
-            "placar_casa_capitao": 22,
-            "placar_visitante_capitao": 39
+            "placar_casa": 24,
+            "placar_visitante": 35,
+            "placar_casa_capitao": 24,
+            "placar_visitante_capitao": 42
         },
         {
             "casa": "Realdonatello",
@@ -1953,17 +1953,17 @@
         {
             "casa": "CL11 FC",
             "visitante": "Pepethinaikos AC",
-            "placar_casa": 22,
-            "placar_visitante": 40,
-            "placar_casa_capitao": 22,
-            "placar_visitante_capitao": 47
+            "placar_casa": 24,
+            "placar_visitante": 42,
+            "placar_casa_capitao": 24,
+            "placar_visitante_capitao": 49
         },
         {
             "casa": "Total 12 FC",
             "visitante": "Estreia da Manhã Fc",
-            "placar_casa": 20,
+            "placar_casa": 21,
             "placar_visitante": 20,
-            "placar_casa_capitao": 20,
+            "placar_casa_capitao": 21,
             "placar_visitante_capitao": 20
         }
     ],
