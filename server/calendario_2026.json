@@ -1889,18 +1889,18 @@
         {
             "casa": "OPPURETTO FC10",
             "visitante": "Decc F.C",
-            "placar_casa": 28,
-            "placar_visitante": 37,
-            "placar_casa_capitao": 28,
-            "placar_visitante_capitao": 37
+            "placar_casa": 38,
+            "placar_visitante": 47,
+            "placar_casa_capitao": 38,
+            "placar_visitante_capitao": 47
         },
         {
             "casa": "Everbary",
             "visitante": "C. E. Olhodaguense",
-            "placar_casa": 46,
-            "placar_visitante": 27,
-            "placar_casa_capitao": 52,
-            "placar_visitante_capitao": 27
+            "placar_casa": 54,
+            "placar_visitante": 32,
+            "placar_casa_capitao": 60,
+            "placar_visitante_capitao": 32
         },
         {
             "casa": "Ronaldito FC",
@@ -1913,9 +1913,9 @@
         {
             "casa": "S.C Milagroso",
             "visitante": "caximbobol FC",
-            "placar_casa": 7,
+            "placar_casa": 17,
             "placar_visitante": 18,
-            "placar_casa_capitao": 7,
+            "placar_casa_capitao": 17,
             "placar_visitante_capitao": 18
         },
         {
@@ -1961,10 +1961,10 @@
         {
             "casa": "Total 12 FC",
             "visitante": "Estreia da Manhã Fc",
-            "placar_casa": 21,
-            "placar_visitante": 20,
-            "placar_casa_capitao": 21,
-            "placar_visitante_capitao": 20
+            "placar_casa": 31,
+            "placar_visitante": 43,
+            "placar_casa_capitao": 31,
+            "placar_visitante_capitao": 43
         }
     ],
     "Rodada 25": [
