@@ -1889,9 +1889,9 @@
         {
             "casa": "OPPURETTO FC10",
             "visitante": "Decc F.C",
-            "placar_casa": 113,
+            "placar_casa": 121,
             "placar_visitante": 81,
-            "placar_casa_capitao": 124,
+            "placar_casa_capitao": 132,
             "placar_visitante_capitao": 87
         },
         {
@@ -1905,18 +1905,18 @@
         {
             "casa": "Ronaldito FC",
             "visitante": "Wakanda_sport_club",
-            "placar_casa": 93,
+            "placar_casa": 101,
             "placar_visitante": 111,
-            "placar_casa_capitao": 99,
+            "placar_casa_capitao": 107,
             "placar_visitante_capitao": 122
         },
         {
             "casa": "S.C Milagroso",
             "visitante": "caximbobol FC",
-            "placar_casa": 108,
-            "placar_visitante": 84,
-            "placar_casa_capitao": 114,
-            "placar_visitante_capitao": 95
+            "placar_casa": 116,
+            "placar_visitante": 92,
+            "placar_casa_capitao": 122,
+            "placar_visitante_capitao": 103
         },
         {
             "casa": "S.E. BURROW LSU",
@@ -1937,17 +1937,17 @@
         {
             "casa": "ArroganTRI/PR",
             "visitante": "JAKTE FC",
-            "placar_casa": 63,
+            "placar_casa": 71,
             "placar_visitante": 83,
-            "placar_casa_capitao": 74,
+            "placar_casa_capitao": 82,
             "placar_visitante_capitao": 89
         },
         {
             "casa": "Coringudo da Zn",
             "visitante": "LUIGIONEL MESSI",
-            "placar_casa": 23,
+            "placar_casa": 31,
             "placar_visitante": 100,
-            "placar_casa_capitao": 26,
+            "placar_casa_capitao": 34,
             "placar_visitante_capitao": 107
         },
         {
