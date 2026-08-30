@@ -1971,10 +1971,10 @@
         {
             "casa": "Decc F.C",
             "visitante": "Everbary",
-            "placar_casa": 9,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 10,
-            "placar_visitante_capitao": 0
+            "placar_casa": 7,
+            "placar_visitante": 5,
+            "placar_casa_capitao": 9,
+            "placar_visitante_capitao": 5
         },
         {
             "casa": "OPPURETTO FC10",
@@ -2011,9 +2011,9 @@
         {
             "casa": "Data CFC",
             "visitante": "ArroganTRI/PR",
-            "placar_casa": 0,
+            "placar_casa": 8,
             "placar_visitante": 0,
-            "placar_casa_capitao": 0,
+            "placar_casa_capitao": 8,
             "placar_visitante_capitao": 0
         },
         {
@@ -2027,9 +2027,9 @@
         {
             "casa": "JAKTE FC",
             "visitante": "CL11 FC",
-            "placar_casa": 10,
+            "placar_casa": 8,
             "placar_visitante": 0,
-            "placar_casa_capitao": 10,
+            "placar_casa_capitao": 8,
             "placar_visitante_capitao": 0
         },
         {
