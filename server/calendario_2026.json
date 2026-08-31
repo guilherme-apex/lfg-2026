@@ -2019,18 +2019,18 @@
         {
             "casa": "BOTTONS CASCAVEL",
             "visitante": "Coringudo da Zn",
-            "placar_casa": 79,
+            "placar_casa": 83,
             "placar_visitante": 32,
-            "placar_casa_capitao": 84,
+            "placar_casa_capitao": 88,
             "placar_visitante_capitao": 33
         },
         {
             "casa": "JAKTE FC",
             "visitante": "CL11 FC",
-            "placar_casa": 96,
-            "placar_visitante": 79,
-            "placar_casa_capitao": 101,
-            "placar_visitante_capitao": 82
+            "placar_casa": 97,
+            "placar_visitante": 84,
+            "placar_casa_capitao": 102,
+            "placar_visitante_capitao": 89
         },
         {
             "casa": "LUIGIONEL MESSI",
@@ -2043,10 +2043,10 @@
         {
             "casa": "Pepethinaikos AC",
             "visitante": "Estreia da Manhã Fc",
-            "placar_casa": 92,
-            "placar_visitante": 88,
-            "placar_casa_capitao": 103,
-            "placar_visitante_capitao": 93
+            "placar_casa": 93,
+            "placar_visitante": 91,
+            "placar_casa_capitao": 104,
+            "placar_visitante_capitao": 96
         }
     ],
     "Rodada 26": [
