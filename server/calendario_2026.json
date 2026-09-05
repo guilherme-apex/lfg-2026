@@ -2069,9 +2069,9 @@
         {
             "casa": "S.E. BURROW LSU",
             "visitante": "OPPURETTO FC10",
-            "placar_casa": 6,
+            "placar_casa": 5,
             "placar_visitante": 0,
-            "placar_casa_capitao": 6,
+            "placar_casa_capitao": 5,
             "placar_visitante_capitao": 0
         },
         {
@@ -2085,33 +2085,33 @@
         {
             "casa": "ArroganTRI/PR",
             "visitante": "Wakanda_sport_club",
-            "placar_casa": 0,
+            "placar_casa": 2,
             "placar_visitante": 0,
-            "placar_casa_capitao": 0,
+            "placar_casa_capitao": 2,
             "placar_visitante_capitao": 0
         },
         {
             "casa": "Coringudo da Zn",
             "visitante": "caximbobol FC",
-            "placar_casa": 0,
+            "placar_casa": 4,
             "placar_visitante": 0,
-            "placar_casa_capitao": 0,
+            "placar_casa_capitao": 4,
             "placar_visitante_capitao": 0
         },
         {
             "casa": "CL11 FC",
             "visitante": "Data CFC",
-            "placar_casa": 11,
-            "placar_visitante": 11,
-            "placar_casa_capitao": 11,
-            "placar_visitante_capitao": 11
+            "placar_casa": 10,
+            "placar_visitante": 16,
+            "placar_casa_capitao": 10,
+            "placar_visitante_capitao": 16
         },
         {
             "casa": "Total 12 FC",
             "visitante": "BOTTONS CASCAVEL",
-            "placar_casa": 5,
+            "placar_casa": 11,
             "placar_visitante": 0,
-            "placar_casa_capitao": 5,
+            "placar_casa_capitao": 11,
             "placar_visitante_capitao": 0
         },
         {
