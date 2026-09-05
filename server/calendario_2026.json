@@ -2061,9 +2061,9 @@
         {
             "casa": "S.C Milagroso",
             "visitante": "Everbary",
-            "placar_casa": 5,
+            "placar_casa": 0,
             "placar_visitante": 0,
-            "placar_casa_capitao": 5,
+            "placar_casa_capitao": 0,
             "placar_visitante_capitao": 0
         },
         {
@@ -2077,9 +2077,9 @@
         {
             "casa": "Realdonatello",
             "visitante": "C. E. Olhodaguense",
-            "placar_casa": 0,
+            "placar_casa": 11,
             "placar_visitante": 0,
-            "placar_casa_capitao": 0,
+            "placar_casa_capitao": 11,
             "placar_visitante_capitao": 0
         },
         {
@@ -2101,10 +2101,10 @@
         {
             "casa": "CL11 FC",
             "visitante": "Data CFC",
-            "placar_casa": 6,
-            "placar_visitante": 12,
-            "placar_casa_capitao": 6,
-            "placar_visitante_capitao": 12
+            "placar_casa": 11,
+            "placar_visitante": 11,
+            "placar_casa_capitao": 11,
+            "placar_visitante_capitao": 11
         },
         {
             "casa": "Total 12 FC",
@@ -2117,10 +2117,10 @@
         {
             "casa": "Estreia da Manhã Fc",
             "visitante": "JAKTE FC",
-            "placar_casa": 0,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 0,
-            "placar_visitante_capitao": 0
+            "placar_casa": 17,
+            "placar_visitante": 32,
+            "placar_casa_capitao": 17,
+            "placar_visitante_capitao": 32
         },
         {
             "casa": "Pepethinaikos AC",
