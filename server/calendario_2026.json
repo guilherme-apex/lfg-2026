@@ -2061,17 +2061,17 @@
         {
             "casa": "S.C Milagroso",
             "visitante": "Everbary",
-            "placar_casa": 0,
+            "placar_casa": 5,
             "placar_visitante": 0,
-            "placar_casa_capitao": 0,
+            "placar_casa_capitao": 5,
             "placar_visitante_capitao": 0
         },
         {
             "casa": "S.E. BURROW LSU",
             "visitante": "OPPURETTO FC10",
-            "placar_casa": 0,
+            "placar_casa": 6,
             "placar_visitante": 0,
-            "placar_casa_capitao": 0,
+            "placar_casa_capitao": 6,
             "placar_visitante_capitao": 0
         },
         {
@@ -2101,17 +2101,17 @@
         {
             "casa": "CL11 FC",
             "visitante": "Data CFC",
-            "placar_casa": 0,
-            "placar_visitante": 0,
-            "placar_casa_capitao": 0,
-            "placar_visitante_capitao": 0
+            "placar_casa": 6,
+            "placar_visitante": 12,
+            "placar_casa_capitao": 6,
+            "placar_visitante_capitao": 12
         },
         {
             "casa": "Total 12 FC",
             "visitante": "BOTTONS CASCAVEL",
-            "placar_casa": 0,
+            "placar_casa": 5,
             "placar_visitante": 0,
-            "placar_casa_capitao": 0,
+            "placar_casa_capitao": 5,
             "placar_visitante_capitao": 0
         },
         {
