@@ -2053,34 +2053,34 @@
         {
             "casa": "Ronaldito FC",
             "visitante": "Decc F.C",
-            "placar_casa": 69,
-            "placar_visitante": 59,
-            "placar_casa_capitao": 72,
-            "placar_visitante_capitao": 64
+            "placar_casa": 66,
+            "placar_visitante": 56,
+            "placar_casa_capitao": 69,
+            "placar_visitante_capitao": 61
         },
         {
             "casa": "S.C Milagroso",
             "visitante": "Everbary",
-            "placar_casa": 77,
-            "placar_visitante": 83,
-            "placar_casa_capitao": 85,
-            "placar_visitante_capitao": 91
-        },
-        {
-            "casa": "S.E. BURROW LSU",
-            "visitante": "OPPURETTO FC10",
-            "placar_casa": 81,
-            "placar_visitante": 87,
+            "placar_casa": 79,
+            "placar_visitante": 82,
             "placar_casa_capitao": 87,
             "placar_visitante_capitao": 90
         },
         {
+            "casa": "S.E. BURROW LSU",
+            "visitante": "OPPURETTO FC10",
+            "placar_casa": 85,
+            "placar_visitante": 91,
+            "placar_casa_capitao": 91,
+            "placar_visitante_capitao": 94
+        },
+        {
             "casa": "Realdonatello",
             "visitante": "C. E. Olhodaguense",
-            "placar_casa": 82,
-            "placar_visitante": 87,
-            "placar_casa_capitao": 90,
-            "placar_visitante_capitao": 90
+            "placar_casa": 87,
+            "placar_visitante": 88,
+            "placar_casa_capitao": 95,
+            "placar_visitante_capitao": 91
         },
         {
             "casa": "ArroganTRI/PR",
@@ -2093,18 +2093,18 @@
         {
             "casa": "Coringudo da Zn",
             "visitante": "caximbobol FC",
-            "placar_casa": 40,
-            "placar_visitante": 65,
-            "placar_casa_capitao": 42,
-            "placar_visitante_capitao": 66
+            "placar_casa": 35,
+            "placar_visitante": 69,
+            "placar_casa_capitao": 37,
+            "placar_visitante_capitao": 70
         },
         {
             "casa": "CL11 FC",
             "visitante": "Data CFC",
-            "placar_casa": 87,
-            "placar_visitante": 76,
-            "placar_casa_capitao": 90,
-            "placar_visitante_capitao": 79
+            "placar_casa": 84,
+            "placar_visitante": 73,
+            "placar_casa_capitao": 87,
+            "placar_visitante_capitao": 76
         },
         {
             "casa": "Total 12 FC",
@@ -2117,9 +2117,9 @@
         {
             "casa": "Estreia da Manhã Fc",
             "visitante": "JAKTE FC",
-            "placar_casa": 69,
+            "placar_casa": 73,
             "placar_visitante": 85,
-            "placar_casa_capitao": 71,
+            "placar_casa_capitao": 75,
             "placar_visitante_capitao": 87
         },
         {
